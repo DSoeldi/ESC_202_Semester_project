@@ -13,16 +13,25 @@ import numpy as np
  #Raphael: i already started a bit for clarity for my functions inside this class
  
 class entity:
-    def __init__(self):
+    def __init__(self, start_position, start_velocity, zombie_max_speed):
+        """
+        Initializes a simulation entity (Human or Zombie).
+        
+        Args:
+            start_position (tuple): Initial (x, y) coordinates.
+            start_velocity (tuple): Initial (x, y) velocity vector. 
+                                    Note: Should not be (0,0) to avoid division errors.
+            zombie_max_speed (float): Fixed max speed of the zombie.
+        """
         
         #shall be a bool
-        self.alerted = ... 
+        self.alerted = False
         
-        #is a vector from origin to position e.g. (?) np.array([10.0, 5.0])
-        self.position = ...
+        #is a vector from origin to position e.g. np.array((10.0, 5.0))
+        self.position = np.array(start_position)
         
-        #velocity is a vector e.g. (?) np.array([10.0, 5.0])
-        self.velocity = ...
+        #velocity is a vector e.g. np.array((10.0, 5.0))
+        self.velocity = np.array(start_velocity)
         
         #---TEMPORARY-NOTES-RAPHAEL---
         #is quick math like this faster or with numpy?
@@ -31,32 +40,44 @@ class entity:
         #-----------------------------
         
         #speed is a scalar, has no direction, (magnitude of velocity)
-        self.velocity_speed= (velocity[0]**2 + velocity[1]**2)**0.5
+        self.velocity_speed= (self.velocity[0]**2 + self.velocity[1]**2)**0.5
         
-        #direction will be a unit vector of velocity e.g.  np.array([0,-1]), or  np.array([1,1])
-        self.velocity_direction = velocity / velocity_speed
+        #direction will be a unit vector of velocity e.g.  np.array((0,-1)), or  np.array((1,1))
+        self.velocity_direction = self.velocity / self.velocity_speed
         
         #speed is a scalar, has no direction, this needs to be defined
-        #its the speed the zombie has when he wants to eat a human
-        self.zombie_max_alerted_speed = ...
+        #its the speed the zombie has when he wants to eat a human, 
+        #meaning he alerted == True
+        self.zombie_max_speed = zombie_max_speed
         
 
         
     #--------------------ZOMBIE-WALK-START-RAPHAEL-----------------------------
     
-    def zombie_walk(self, here_still_needs_pos_nearest_human_from_knn):
+    def zombie_walk(self, position_nearest_human):
+        """
+        Checks the alert state and executes the appropriate walk behavior.
+    
+        Args:
+            position_nearest_human (np.ndarray): The (x, y) coordinates of the target human.
+            
+        Returns:
+            None: continues by calling the function for the type of walk the zombie will do
+            
+        """
         
         #INFO
         #this function calls functions that change the entity.velocity & 
         #entity.direction according to the if statements down below, it does
         #not however actually DO the step!
         
-        #check if zombie has been alerted in self.knn()->anais
+        #position_nearest_human ->this position_nearest_human should come 
+        #from knn somehow, we defind it to come from there in our document 
         
         if self.alerted == True:
             #there is a humans close!
             #lets go check where the human is and adjust our velocity
-            self.human_awareness_walk(here_still_needs_pos_nearest_human_from_knn)
+            self.human_awareness_walk(position_nearest_human)
             
         else: 
             #mhm no food for me (zombie) right know...
@@ -65,6 +86,16 @@ class entity:
         return
     
     def random_walk(self):
+        """
+        Adjusts the zombie's velocity with a random walk.
+    
+        Args:
+           None
+    
+        Returns:
+            None: Updates self.velocity directly.
+        """
+
         #Check zombie_walk() for more informations
         #redirect the velocity direction according to the random walk without
         #changing the magnitude of the vector
@@ -81,21 +112,24 @@ class entity:
         
         return 
     
-    def human_awareness_walk(self, here_still_needs_pos_nearest_human_from_knn):
+    def human_awareness_walk(self, position_nearest_human):
+        """
+        Adjusts the zombie's velocity to chase the nearest human with max speed.
+    
+        Args:
+            position_nearest_human (np.ndarray)): The (x, y) coordinates of the target human.
+    
+        Returns:
+            None: Updates self.velocity directly.
+            
+        Raises:
+            ValueError: If the zombie and human are at the exact same position.
+        """
         #Check zombie_walk() for more informations
         
         #INFO
         #change the zombie velocity  vector, so that i points to the closes human 
         #and so that the vector velocity is at it max_zombie_speed
-        
-        #---TEMPORARY-NOTES-RAPHAEL---
-        #?? knn() should pull out human or zombie position if there is one close by->have to see
-        #how implemented by anais
-        #for now lets act like pos is position of nearest human 
-        
-        #position_nearest_human = here_still_needs_pos_nearest_human_from_knn= e.g.np.array([10.0, 5.0])
-        #-----------------------------
-        position_nearest_human = ...
         
         #get vector from position zombie pointing to position human
         zombie_to_human_vector = position_nearest_human - self.position
@@ -123,9 +157,9 @@ class entity:
         
         new_zombie_direction = zombie_to_human_vector / distance_zombie_to_human
         
-        #to this direction multiply the zombie_max_alerted_speed to get new velocity of zombie and store it there
+        #to this direction multiply the zombie_max_speed to get new velocity of zombie and store it there
         
-        self.velocity =  new_zombie_direction * self.zombie_max_alerted_speed
+        self.velocity =  new_zombie_direction * self.zombie_max_speed
 
         return 
     
