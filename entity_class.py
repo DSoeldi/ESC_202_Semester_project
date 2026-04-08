@@ -7,50 +7,226 @@ Created on Thu Apr  2 08:58:11 2026
 """
 from globals import rng
 import numpy as np
+from copy import deepcopy
 
 
  #--------------------CLASS-ENTITY-START-ANAïS-----------------------------
  #Raphael: i already started a bit for clarity for my functions inside this class
  
 class entity:
-    def __init__(self, start_position, start_velocity, zombie_max_speed):
+    @ staticmethod
+    def validate_mode(mode):
+        """
+        static method to validate: mode
+        """
+        if mode not in ("H", "Z"): raise(ValueError)
+
+    @ staticmethod
+    def validate_vector(vector):
+        """
+        static method to validate: pos, velocity, pos_alerted vectors
+        """
+        if not isinstance(vector, np.ndarray): raise(ValueError)
+        if not isinstance(vector[0], np.float64): raise(ValueError)
+        if not isinstance(vector[1], np.float64): raise(ValueError)
+        if not np.shape(vector) == (2,): raise(ValueError)
+    
+    @ staticmethod
+    def validate_alerted(alerted):
+        """
+        static method to validate: alerted
+        """
+        if not isinstance(alerted, bool): raise(ValueError)
+
+        # if alerted == True, pos_alerter, should not be None!!!
+        # if alerted = False, pos_alerter should be None!!
+
+    @ staticmethod
+    def validate_pq(pq):
+        """
+        static method to validate: pq
+        """
+        pass
+
+    @ staticmethod
+    def validate_max_speed(max_speed):
+        """
+        static method to validate: max_speed_H, max_speed_Z
+        """
+        #---TEMPORARY-NOTES-ANAIS-----
+            # test if the max speed is within some range?... so if at some point we have variable max_speeds,
+            # we make sure it always is within some realistic range?
+        #-----------------------------
+        if not isinstance(max_speed, float): raise(ValueError)
+
+    def __init__(self, mode, pos, velocity = np.array((0.0,0.0)), alerted = False, 
+                 pos_alerter = None, pq = None, max_speed_Z = 20.0, max_speed_H = 28.0):
         """
         Initializes a simulation entity (Human or Zombie).
         
-        Args:
-            start_position (tuple): Initial (x, y) coordinates.
-            start_velocity (tuple): Initial (x, y) velocity vector. 
-                                    Note: Should not be (0,0) to avoid division errors.
-            zombie_max_speed (float): Fixed max speed of the zombie.
+        Positional Args:
+            mode (str):  
+                "Z" or "H" defines whether entity is a human or a zombie 
+            pos (np.array((x,y))):  
+                current position vector of entity                
+        
+        Keyword Args:
+            velocity (np.array((x,y))): 
+                current velocity vector of entity
+                Note: Should not be (0,0) to avoid division errors. ????
+            alerted (bool):
+                Is a zombie/human in my awareness radius?  
+            pos_alerter (np.array((x,y))):
+                position vector of alerting entity    
+            pq (heap):
+                Priority queue for entity
+            max_speed_Z (float) in [km/h]: 
+                Fixed max speed for zombies. It's the speed the zombie has when he wants to eat a human, meaning alerted == True
+            max_speed_H (float) in [km/h]: 
+                Fixed max speed for humans.
         """
         
-        #shall be a bool
-        self.alerted = False
+        self.mode = mode
+        self.pos = pos
+        self.velocity = velocity
+        self.alerted = alerted
+        self.pos_alerter = pos_alerter 
+        self.pq = pq 
+        self.max_speed_Z = max_speed_Z
+        self.max_speed_H = max_speed_H  # avg human sprint: 24-32km/h
         
-        #is a vector from origin to position e.g. np.array((10.0, 5.0))
-        self.position = np.array(start_position)
-        
-        #velocity is a vector e.g. np.array((10.0, 5.0))
-        self.velocity = np.array(start_velocity)
-        
-        #---TEMPORARY-NOTES-RAPHAEL---
-        #is quick math like this faster or with numpy?
-        # (velocity[0]**2 + velocity[1]**2)**0.5   
-        # np.linalg.norm(velocity) ?
+        #---TEMPORARY-NOTES-ANAIS-----
+            # Should we add a varaiable, which stores the capacity of an entity to keep on running, 
+            # which is somehow calculated through some function of time/distance & velocity??
         #-----------------------------
         
-        #speed is a scalar, has no direction, (magnitude of velocity)
-        self.velocity_speed= (self.velocity[0]**2 + self.velocity[1]**2)**0.5
-        
-        #direction will be a unit vector of velocity e.g.  np.array((0,-1)), or  np.array((1,1))
-        self.velocity_direction = self.velocity / self.velocity_speed
-        
-        #speed is a scalar, has no direction, this needs to be defined
-        #its the speed the zombie has when he wants to eat a human, 
-        #meaning he alerted == True
-        self.zombie_max_speed = zombie_max_speed
-        
+        # Raise Value Error for wrong input
+        self.validate_mode(self.mode)
+        self.validate_vector(self.pos)
+        self.validate_vector(self.velocity)
+        self.validate_alerted(self.alerted)
+        if isinstance(pos_alerter, np.ndarray) or pos_alerter != None: self.validate_vector(self.pos_alerter)
+        # validate pq ??
+        self.validate_max_speed(self.max_speed_Z)
+        self.validate_max_speed(self.max_speed_H)
 
+    def __repr__(self):
+        """ 
+        For printing entity within a collection
+
+        Returns:
+            A string in the form of: "entity_mode(pos, velocity, alerted, pos_alerter)
+        """
+        return f"{self.mode}(pos: {np.round(self.pos, 2)}, v: {np.round(self.velocity, 2)}, alert: {self.alerted}, pos: {self.pos_alerter})"
+    
+    def __eq__(self, other):
+        """
+        Checks if 2 instances of entity are equal (all attributes are equal)
+        Returns: 
+            (bool)
+        """
+        if not isinstance(other, entity): return NotImplemented
+        return ((self.mode == other.mode) and
+                (self.pos == other.pos).all() and 
+                (self.velocity == other.velocity).all() and
+                (self.alerted == other.alerted) and
+                ((self.pos_alerter == other.pos_alerter).all() if (isinstance(self.pos_alerter, np.ndarray) or isinstance(other.pos_alerter, np.ndarray)) else self.pos_alerter == other.pos_alerter) and
+                (self.pq == other.pq) and 
+                (self.max_speed_Z == other.max_speed_Z) and 
+                (self.max_speed_H == other.max_speed_H))
+            
+    def get_speed(self):
+        """
+        calculates speed (scalar, no direction) from velocity vector
+        
+        Returns:
+            speed (int)
+        """
+
+        #---TEMPORARY-NOTES-RAPHAEL---
+            #is quick math like this faster or with numpy?
+            # (velocity[0]**2 + velocity[1]**2)**0.5   
+            # np.linalg.norm(velocity) ?
+        #-----------------------------
+        return (self.velocity[0]**2 + self.velocity[1]**2)**0.5 # magnitude of velocity vector
+    
+    def get_direction(self):
+        #---TEMPORARY-NOTES-ANAIS-----
+            # isch die Funktion nötig ????
+        #-----------------------------
+        """
+        calculates direction (unit vector) from velocity vector
+        
+        Returns:
+            direction (np.array((x,y)))
+        """
+        return self.velocity / self.get_speed()
+        
+    def change_mode(self, new_mode):
+        """
+        changes mode attribute for entity & validates it's type
+        
+        Args:
+            self (entity)
+            new_mode (bool)
+        """
+        self.validate_mode(new_mode) 
+        self.mode = deepcopy(new_mode)
+
+    def change_pos(self, new_pos):
+        """
+        changes pos attribute for entity & validates it's type
+        
+        Args:
+            self (entity)
+            new_pos (np.array((x,y)))
+        """
+        self.validate_vector(new_pos)
+        self.pos = deepcopy(new_pos)
+
+    def change_velocity(self, new_velocity):
+        """
+        changes velocity attribute for entity & validates it's type
+        
+        Args:
+            self (entity)
+            new_velocity (np.array((x,y)))
+        """
+        self.validate_vector(new_velocity)
+        self.velocity = deepcopy(new_velocity)
+
+    def change_alerted(self, new_alerted):
+        """
+        changes alerted attribute for entity & validates it's type
+        
+        Args:
+            self (entity)
+            new_alerted (bool)
+        """
+        self.validate_alerted(new_alerted) 
+        self.alerted = deepcopy(new_alerted)
+
+    def change_pos_alerter(self, new_pos_alerter):
+        """
+        changes alerted attribute for entity & validates it's type
+        
+        Args:
+            self (entity)
+            new_alerted (bool)
+        """
+        if isinstance(new_pos_alerter, np.ndarray) or new_pos_alerter != None: self.validate_vector(new_pos_alerter) 
+        self.pos_alerter = deepcopy(new_pos_alerter)
+    
+    def change_pq(self, new_pq):
+        """
+        changes pq attribute for entity & validates it's type
+        
+        Args:
+            self (entity)
+            new_pq (bool)
+        """
+        self.validate_pq(new_pq) 
+        self.pq = deepcopy(new_pq)
         
     #--------------------ZOMBIE-WALK-START-RAPHAEL-----------------------------
     
@@ -108,7 +284,7 @@ class entity:
         choice = rng.integers(0, 4) 
         
         #change direction, but not speed of velocity
-        self.velocity = self.velocity_speed * DIRECTIONS[choice]
+        self.change_velocity(self.get_speed() * DIRECTIONS[choice])
         
         return 
     
@@ -132,34 +308,34 @@ class entity:
         #and so that the vector velocity is at it max_zombie_speed
         
         #get vector from position zombie pointing to position human
-        zombie_to_human_vector = position_nearest_human - self.position
+        zombie_to_human_vector = position_nearest_human - self.pos
         
         #of this vector get the unit vector
         
         #---TEMPORARY-NOTES-RAPHAEL---
-        #is quick math like this faster or with numpy?
-        #-velocity / (velocity[0]**2 + velocity[1]**2)**0.5   
-        #-velocity / np.linalg.norm(velocity) ?
+            #is quick math like this faster or with numpy?
+            #-velocity / (velocity[0]**2 + velocity[1]**2)**0.5   
+            #-velocity / np.linalg.norm(velocity) ?
         #-----------------------------
         #get the distance
         distance_zombie_to_human = (zombie_to_human_vector[0]**2 + zombie_to_human_vector[1]**2)**0.5  
         
         #---TEMPORARY-NOTES-RAPHAEL---
-        #depending a bit where we end up actually checking if zombie can bite 
-        #human or not this can be changed
-        #(in plan kill radius function is placed in if entity == human branch)
-        #if we dont do kill radius here we have to pay attention, that we dont, 
-        #divided by zero uf they are perfectly on top of each other.
-        #for now:
+            #depending a bit where we end up actually checking if zombie can bite 
+            #human or not this can be changed
+            #(in plan kill radius function is placed in if entity == human branch)
+            #if we dont do kill radius here we have to pay attention, that we dont, 
+            #divided by zero uf they are perfectly on top of each other.
+            #for now:
         if distance_zombie_to_human == 0:
             raise ValueError("Division by zero in human_awareness_walk(): Zombie and Human are at the EXACT same spot! Check function for more Information; Raphael")
         #-----------------------------
         
         new_zombie_direction = zombie_to_human_vector / distance_zombie_to_human
         
-        #to this direction multiply the zombie_max_speed to get new velocity of zombie and store it there
+        #to this direction multiply the max_speed_Z to get new velocity of zombie and store it there
         
-        self.velocity =  new_zombie_direction * self.zombie_max_speed
+        self.change_velocity(new_zombie_direction * self.max_speed_Z)
 
         return 
     
