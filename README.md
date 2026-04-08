@@ -22,7 +22,7 @@ Google Docs: https://docs.google.com/document/d/1POh07QEm5y5eyBowOd3Yyox-G9CZ4kU
 
 
 ## @raphi
-- I saw that in you r Random Walk fucntion for Zombies, there ar eonly 4 possible directions, inw hich the Zomboes, can walk. Is this how we want to do it? We could also use an n.random.uniform(a,b) to generate an infinte amount of random directions! (-anais)
+- I saw that in your Random Walk fucntion for Zombies, there ar eonly 4 possible directions, inw hich the Zomboes, can walk. Is this how we want to do it? We could also use an n.random.uniform(a,b) to generate an infinte amount of random directions! (-anais)
 
 ## @anais
 
