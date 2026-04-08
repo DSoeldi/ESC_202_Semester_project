@@ -13,8 +13,9 @@ Google Docs: https://docs.google.com/document/d/1POh07QEm5y5eyBowOd3Yyox-G9CZ4kU
         - I made a function repr for printing the entity list (to see everything is working as it should)
         - I added functions for changing variables, to be able to check (even after initiation of an instance) that the type one changes to is correct. Use them!!!
             FOR EXAMPLE:
-            instead of: self.direction = new_direction
-            use: self.change_direction(new_direction)
+            __instead of: self.direction = new_direction,
+            use: self.change_direction(new_direction)__
+        - I added functions called validate_... There is one for each "kind" (e.g. pos & velocity can be checked by same fucntion) of attribute, to check they ar evalid inputs. They are always called when an entity is instantiated and when an entity attribute is changed (e.g. enitity1.change_velocity(new_velocity))
 
 
 
