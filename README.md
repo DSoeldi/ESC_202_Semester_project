@@ -21,7 +21,7 @@ Google Docs: https://docs.google.com/document/d/1POh07QEm5y5eyBowOd3Yyox-G9CZ4kU
 
 
 ## @raphi
-- I saw that in your Random Walk function for Zombies, there are only 4 possible directions, in which the Zombies, can walk. Is this how we want to do it? We could also use an n.random.uniform(a,b) to generate an infinte possibility of random directions! (- anais)
+- I saw that in your Random Walk function for Zombies, there are only 4 possible directions, in which the Zombies, can walk. Is this how we want to do it? We could also use an n.random.uniform(a,b) to generate an infinte amount of possibilities of random directions! (- anais)
 
 ## @anais
 
