@@ -352,7 +352,15 @@ class entity:
             #for now:
         if distance_zombie_to_human == 0:
             raise ValueError("Division by zero in human_awareness_walk(): Zombie and Human are at the EXACT same spot! Check function for more Information; Raphael")
+            #possible solution?
+            #store this globaly ? epsilon = 1e-9 
+            # if distance_zombie_to_human > epsilon:
+            #     new_zombie_direction = zombie_to_human_vector / distance_zombie_to_human
+            # else:
+            #     # They are effectively in the same spot
+            #     new_zombie_direction = np.array([0.0, 0.0])
         #-----------------------------
+        
         
         new_zombie_direction = zombie_to_human_vector / distance_zombie_to_human
         
