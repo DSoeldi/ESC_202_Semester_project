@@ -341,7 +341,20 @@ class entity:
     
     #--------------------ZOMBIE-WALK-FINISH-RAPHAEL----------------------------
     
+    def human_walk(self):
+        """
+        defines the humans walk cycle by checking if there is a zombie in the prioq or not. 
+        If there is none, flocking behavior is activated, if a zombie is present, zombie awareness is activated. 
+        Changes the Human direction variable in self. 
+
+        Args: 
+            none
+        
+        Returns:
+            none
+        """
     
+
     
     
     
