@@ -203,11 +203,6 @@ class entity:
     def get_direction(self):
         #---TEMPORARY-NOTES-ANAIS-----
             # isch die Funktion nötig ????
-            #vll bruchts de diego den im flocking behavior??
-            #--> when velocity 0,0 isch, isch speed 0,0, den gits da eh geteilt durch 0, wege
-            #    dem hani obe gschriebe Note: Should not be (0,0) to avoid division errors.
-            #    aber eigentlich au nice wenn amigs paar entities eifach ümestönd ? also mues mehr sicher
-            #    generell na apasse/ lösig finde
         #-----------------------------
         """
         calculates direction (unit vector) from velocity vector
@@ -533,10 +528,9 @@ class entity:
         Raises:
             Relevant Entities needs to be at least 1 for the flocking to work
         """
-
-        relevant_entities = self.pq[0:n_humans] # number of relevant objects that are looped over
         if relevant_entities<1:
             raise ValueError("relevant entities is zero when it should be at least 1")
+        relevant_entities = self.pq[0:n_humans] # number of relevant objects that are looped over
         avoidfactor, matchingfactor, centeringfactor = factors
 
         # average values to influence pattern
@@ -584,14 +578,19 @@ class entity:
         defines the humans walk cycle by checking if there is a zombie in the prioq or not. 
         If there is none, flocking behavior is activated, if a zombie is present, 
         zombie awareness is activated. 
+        If there is none, flocking behavior is activated, if a zombie is present, 
+        zombie awareness is activated. 
         Changes the Human direction variable in self. 
 
         Args: 
+            None            
             None            
         
         Returns:
             none
         """
+        # check if human is alone
+
         # check if human is alone
 
 
@@ -610,8 +609,6 @@ class entity:
             timestep[double]: Timestep used to update the location of entity
         """
         self.pos += self.velocity * timestep
-
-        # periodic boundaries
         
             
     
