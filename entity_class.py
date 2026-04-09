@@ -11,7 +11,7 @@ from copy import deepcopy
 
 
  #--------------------CLASS-ENTITY-START-ANAïS-----------------------------
- #Raphael: i already started a bit for clarity for my functions inside this class
+
  
 class entity:
     @ staticmethod
@@ -116,7 +116,15 @@ class entity:
 
         Returns:
             A string in the form of: "entity_mode(pos, velocity, alerted, pos_alerter)
-        """
+        """ 
+        #---HElP-NOTES-RAPHAEL-------
+        # Dunder Methods (Double Underscore like __repr__, __eq__)
+        # - The "Standardized Plug": Instead of remembering a custom name like 
+        #   print_data_zombi(), I can use standard Python tools like print(zombie1).
+        # - Automatic Hooks: Python triggers these automatically behind the scenes.
+        # - Replaces memory addresses (<entity object at...>) with whatever is returned here
+        #-----------------------------
+        
         return f"{self.mode}(pos: {np.round(self.pos, 2)}, v: {np.round(self.velocity, 2)}, alert: {self.alerted}, pos: {self.pos_alerter})"
     
     def __eq__(self, other):
@@ -125,6 +133,15 @@ class entity:
         Returns: 
             (bool)
         """
+        #---HElP-NOTES-RAPHAEL-------
+            #1. this you can use just by using  is entity1 == entity2 ("shortcut to ask"), 
+            #   python will understand entity1.__eq__(entity2) and go in here
+            
+            #2. NotImplemented is fancy way to say False, and then try other way around
+            #    python will call entity2.__eq__(entity1)
+            #  try A==B, -> false, ok so then try B==A
+        #-----------------------------
+        
         if not isinstance(other, entity): return NotImplemented
         return ((self.mode == other.mode) and
                 (self.pos == other.pos).all() and 
@@ -153,6 +170,11 @@ class entity:
     def get_direction(self):
         #---TEMPORARY-NOTES-ANAIS-----
             # isch die Funktion nötig ????
+            #vll bruchts de diego den im flocking behavior??
+            #--> when velocity 0,0 isch, isch speed 0,0, den gits da eh geteilt durch 0, wege
+            #    dem hani obe gschriebe Note: Should not be (0,0) to avoid division errors.
+            #    aber eigentlich au nice wenn amigs paar entities eifach ümestönd ? also mues mehr sicher
+            #    generell na apasse/ lösig finde
         #-----------------------------
         """
         calculates direction (unit vector) from velocity vector
@@ -272,19 +294,22 @@ class entity:
             None: Updates self.velocity directly.
         """
 
-        #Check zombie_walk() for more informations
+        ##INFO
         #redirect the velocity direction according to the random walk without
-        #changing the magnitude of the vector
-        #-> new velocity (same magnitude but different direction) 
+        #changing the speed of the vector
         
-        # Define directions if the walk
-        DIRECTIONS = np.array([[0, 1], [1, 0], [0, -1], [-1, 0]])
         
-        #pick random integer from 0 to 3
-        choice = rng.integers(0, 4) 
+        #choose a random angle (radians) in a full circle
+        theta = rng.uniform(0, np.pi * 2)
         
-        #change direction, but not speed of velocity
-        self.change_velocity(self.get_speed() * DIRECTIONS[choice])
+        #new_direction has to be a unit vector
+        new_direction = np.array([np.cos(theta), np.sin(theta)])
+        
+        #Scale new_direction by the current speed
+        new_velocity = self.get_speed() * new_direction
+        
+        #update
+        self.change_velocity(new_velocity)
         
         return 
     
@@ -301,12 +326,9 @@ class entity:
         Raises:
             ValueError: If the zombie and human are at the exact same position.
         """
-        #Check zombie_walk() for more informations
-        
-        #INFO
-        #change the zombie velocity  vector, so that i points to the closes human 
-        #and so that the vector velocity is at it max_zombie_speed
-        
+        ##INFO
+        #change the zombie velocity  vector, so that i points to the closes human & with max_zombie_speed
+
         #get vector from position zombie pointing to position human
         zombie_to_human_vector = position_nearest_human - self.pos
         
@@ -317,6 +339,7 @@ class entity:
             #-velocity / (velocity[0]**2 + velocity[1]**2)**0.5   
             #-velocity / np.linalg.norm(velocity) ?
         #-----------------------------
+        
         #get the distance
         distance_zombie_to_human = (zombie_to_human_vector[0]**2 + zombie_to_human_vector[1]**2)**0.5  
         
