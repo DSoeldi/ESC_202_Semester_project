@@ -19,6 +19,7 @@ Google Docs: https://docs.google.com/document/d/1POh07QEm5y5eyBowOd3Yyox-G9CZ4kU
 ## @anais
 - remove get_direction????
 - raphael schreiben, wenn knn fertig
+- remove: "(self.max_speed_Z == other.max_speed_Z) and (self.max_speed_H == other.max_speed_H))" from entity.__eq__ function
 
 ## @diego
 - min heap oder max heap? jenachdem muss flocking geändert werden da dort im heap gesliced wird.
