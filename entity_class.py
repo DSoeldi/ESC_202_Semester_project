@@ -5,7 +5,7 @@ Created on Thu Apr  2 08:58:11 2026
 
 @author: raphaeltarabinicastellani
 """
-from globals import rng
+from rng_seed import rng
 from priority_queue_class import prio_q
 import numpy as np
 from copy import deepcopy
@@ -32,6 +32,13 @@ class entity:
         if not isinstance(vector[1], np.float64): raise(ValueError)
         if not np.shape(vector) == (2,): raise(ValueError)
     
+    @ staticmethod
+    def validate_param_dict(d):
+        """
+        static method to validate: param_dict
+        """
+        if not isinstance(d, dict): raise(ValueError)
+
     @ staticmethod
     def validate_alerted(alerted):
         """
@@ -80,15 +87,21 @@ class entity:
         Positional Args:
             mode (str):  
                 "Z" or "H" defines whether entity is a human or a zombie 
+            
             pos (np.array((x,y))):  
-                current position vector of entity                
+                current position vector of entity 
+            
+            param_dict (dictionary):
+                Containing import values.            
         
         Keyword Args:
             velocity (np.array((x,y))): 
                 current velocity vector of entity
                 Note: Should not be (0,0) to avoid division errors. ????
+            
             alerted (bool):
                 Is a zombie/human in my awareness radius?  
+            
             pos_alerter (np.array((x,y))):
                 position vector of alerting entity   
             max_speed_Z (float) in [km/h]: 
@@ -107,6 +120,7 @@ class entity:
         
         self.mode = mode
         self.pos = pos
+        self.param_dict = param_dict
         self.velocity = velocity
         self.alerted = alerted
         self.pos_alerter = pos_alerter 
@@ -125,6 +139,7 @@ class entity:
         # Raise Value Error for wrong input
         self.validate_mode(self.mode)
         self.validate_vector(self.pos)
+        self.validate_param_dict(self.param_dict)
         self.validate_vector(self.velocity)
         self.validate_alerted(self.alerted)
         if isinstance(pos_alerter, np.ndarray) or pos_alerter != None: self.validate_vector(self.pos_alerter)
