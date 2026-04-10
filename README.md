@@ -21,8 +21,9 @@ Google Docs: https://docs.google.com/document/d/1POh07QEm5y5eyBowOd3Yyox-G9CZ4kU
 - raphael schreiben, wenn knn fertig
 
 ## @diego
-min heap oder max heap? jenachdem muss flocking geändert werden da dort im heap gesliced wird.
-- zombies can go silent/dead/decease if they dont eat humans for some time 
+- min heap oder max heap? jenachdem muss flocking geändert werden da dort im heap gesliced wird.
+- zombies can go silent/dead/decease if they dont eat humans for some time
+- change.velocity bruche statt self.velocity = ...
 
 ## 10.04.2026
 min heap oder max heap? jenachdem muss flocking geändert werden da dort im heap gesliced wird.
