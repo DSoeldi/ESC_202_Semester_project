@@ -54,3 +54,7 @@ Google Docs: https://docs.google.com/document/d/1POh07QEm5y5eyBowOd3Yyox-G9CZ4kU
 min heap oder max heap? jenachdem muss flocking geändert werden da dort im heap gesliced wird.
 
 
+## future?
+- delete dead entities from entity list? How?? That for loops that use entity list do not end up skipping other entities?
+
+
