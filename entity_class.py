@@ -272,7 +272,7 @@ class entity:
         #position_nearest_human ->this position_nearest_human should come 
         #from knn somehow, we defind it to come from there in our document 
         
-        if self.alerted == True:
+        if self.alerted:
             #there is a humans close!
             #lets go check where the human is and adjust our velocity
             self.human_awareness_walk(position_nearest_human)
