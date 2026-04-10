@@ -42,10 +42,15 @@ Google Docs: https://docs.google.com/document/d/1POh07QEm5y5eyBowOd3Yyox-G9CZ4kU
 
 ## @anais
     - remove get_direction????
+    - initialize_param_dict: write validate fucntions for the flocking parameters
+    - add param_dict attribute to entity & add max_spped_Z/H to param_dict
+    - add a mode "dead" for entity class, for Zombies, that have died (their last meal is too long ago)
+    - ignore dead zombies in prio queue!
 
 ## @diego
 
 
 ## 10.04.2026
 min heap oder max heap? jenachdem muss flocking geändert werden da dort im heap gesliced wird.
+
 
