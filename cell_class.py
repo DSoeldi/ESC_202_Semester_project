@@ -109,7 +109,7 @@ class cell:
             A list of 2 lists of indexes of all entities contained within THIS cell, the 1st sorted (ascending) by their x coordinates, the 2nd by their y coordinates
         """
         n = len(self.ents_idx_sort[0])
-        start = 0 if d_cell == 1 else n//2 # should not start at next entity!!!!!!!!!!!!!!! should start at next larger float of 6th entity!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        start = 0 if d_cell == 1 else n//2 
         end = n//2 if d_cell == 1 else None 
 
         ents_idx_sort_d_cell = [0, 0]
