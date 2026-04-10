@@ -58,9 +58,20 @@ class entity:
             # we make sure it always is within some realistic range?
         #-----------------------------
         if not isinstance(max_speed, float): raise(ValueError)
+    
+    @ staticmethod
+    def validate_awareness_radius(awareness_r):
+        """
+        static method to validate: awareness_r_H,awareness_r_Z
+        """
+        if not isinstance(awareness_r, float): raise(ValueError)
+        #---TEMPORARY-NOTES-ANAIS-----
+            # test if the max awareness radius is within some realistic range?
+        #-----------------------------
+
 
     def __init__(self, mode, pos, velocity = np.array((0.0,0.0)), alerted = False, 
-                 pos_alerter = None, pq = None, max_speed_Z = 20.0, max_speed_H = 28.0):
+                 pos_alerter = None, pq = None, max_speed_Z = 20.0, max_speed_H = 28.0, awareness_r_H = 0.02, awareness_r_Z = 0.015):
         """
         Initializes a simulation entity (Human or Zombie).
         
@@ -84,6 +95,10 @@ class entity:
                 Fixed max speed for zombies. It's the speed the zombie has when he wants to eat a human, meaning alerted == True
             max_speed_H (float) in [km/h]: 
                 Fixed max speed for humans.
+            awareness_r_H (float) in [km]:
+                Awareness radius for a Human
+            awareness_r_Z (float) in [km]:
+                Awareness radius for a Zombie
         """
         
         self.mode = mode
@@ -94,6 +109,9 @@ class entity:
         self.pq = pq 
         self.max_speed_Z = max_speed_Z
         self.max_speed_H = max_speed_H  # avg human sprint: 24-32km/h
+        self.awareness_r_H = awareness_r_H
+        self.awareness_r_Z = awareness_r_Z
+
         
         #---TEMPORARY-NOTES-ANAIS-----
             # Should we add a varaiable, which stores the capacity of an entity to keep on running, 
@@ -109,6 +127,8 @@ class entity:
         # validate pq ??
         self.validate_max_speed(self.max_speed_Z)
         self.validate_max_speed(self.max_speed_H)
+        self.validate_awareness_radius(awareness_r_H)
+        self.validate_awareness_radius(awareness_r_Z)
 
     def __repr__(self):
         """ 
@@ -134,7 +154,7 @@ class entity:
                 (self.pq == other.pq) and 
                 (self.max_speed_Z == other.max_speed_Z) and 
                 (self.max_speed_H == other.max_speed_H))
-            
+    
     def get_speed(self):
         """
         calculates speed (scalar, no direction) from velocity vector
