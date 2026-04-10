@@ -1,5 +1,5 @@
 from cell_class import cell
-from main_parameters_initialize import entities, parameter_dict, root_cell
+from globals import entities, parameter_dict, root_cell
 from entity_class import entity
 
 import matplotlib.pyplot as plt
@@ -14,7 +14,7 @@ fig.suptitle("Binary tree")
 for e in entities:
     ax.plot(e.pos[0], e.pos[1], 'o', markersize = 1.5, color = "red" if e.mode == "Z" else "blue")
 
-ax.set_title(f"particles: {len(entities)}", color = "grey")
+ax.set_title(f"# entities: {len(entities)}", color = "grey")
 ax.set_xlabel('x')
 ax.set_ylabel('y')
 
