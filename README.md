@@ -38,7 +38,12 @@ Google Docs: https://docs.google.com/document/d/1POh07QEm5y5eyBowOd3Yyox-G9CZ4kU
 
 
 ## @raphi
-- to do: write functions. kill radius, do after knn anais
+- to do: . kill radius, do after knn anais
+- diego schreiben wenn kill radius fertig
+- write tests for my functions thinks about some stuff, edge cases... etc. / make a fly e.g zombie walk. do the functions that are there. for just on test function one test, not multiple.
+
+- in zombie walk.raisewarnung. not raise error lib. math next_after gives really small, distance wird zu next after
+- also use in params dictionary. the speed zombie have when they are random walking. do not use get_speed 
 
 ## @anais
     - remove get_direction????
@@ -46,6 +51,7 @@ Google Docs: https://docs.google.com/document/d/1POh07QEm5y5eyBowOd3Yyox-G9CZ4kU
     - add param_dict attribute to entity & add max_spped_Z/H to param_dict
     - add a mode "dead" for entity class, for Zombies, that have died (their last meal is too long ago)
     - ignore dead zombies in prio queue!
+    -raphael schreiben, wenn knn fertig
 
 ## @diego
 min heap oder max heap? jenachdem muss flocking geändert werden da dort im heap gesliced wird.
