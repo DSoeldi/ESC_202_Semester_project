@@ -332,16 +332,8 @@ class entity:
         #get vector from position zombie pointing to position human
         zombie_to_human_vector = position_nearest_human - self.pos
         
-        #of this vector get the unit vector
-        
-        #---TEMPORARY-NOTES-RAPHAEL---
-            #is quick math like this faster or with numpy?
-            #-velocity / (velocity[0]**2 + velocity[1]**2)**0.5   
-            #-velocity / np.linalg.norm(velocity) ?
-        #-----------------------------
-        
         #get the distance
-        distance_zombie_to_human = (zombie_to_human_vector[0]**2 + zombie_to_human_vector[1]**2)**0.5  
+        distance_zombie_to_human = self.get_distance(position_nearest_human) 
         
         #---TEMPORARY-NOTES-RAPHAEL---
             #depending a bit where we end up actually checking if zombie can bite 
@@ -352,12 +344,19 @@ class entity:
             #for now:
         if distance_zombie_to_human == 0:
             raise ValueError("Division by zero in human_awareness_walk(): Zombie and Human are at the EXACT same spot! Check function for more Information; Raphael")
+            #possible solution?
+            #store this globaly ? epsilon = 1e-9 
+            # if distance_zombie_to_human > epsilon: or just do if == 0 make array 0.0,0.0
+            #     new_zombie_direction = zombie_to_human_vector / distance_zombie_to_human
+            # else:
+            #     # They are effectively in the same spot
+            #     new_zombie_direction = np.array([0.0, 0.0])
         #-----------------------------
+        
         
         new_zombie_direction = zombie_to_human_vector / distance_zombie_to_human
         
         #to this direction multiply the max_speed_Z to get new velocity of zombie and store it there
-        
         self.change_velocity(new_zombie_direction * self.max_speed_Z)
 
         return 
