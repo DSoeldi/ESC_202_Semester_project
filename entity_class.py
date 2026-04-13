@@ -9,6 +9,7 @@ from priority_queue_class import prio_q
 from rng_seed import rng
 import numpy as np
 from copy import deepcopy
+import math
 
 
  #--------------------CLASS-ENTITY-START-ANAïS-----------------------------
@@ -388,9 +389,6 @@ class entity:
     
         Returns:
             None: Updates self.velocity directly.
-            
-        Raises:
-            ValueError: If the zombie and human are at the exact same position.
         """
         ##INFO
         #change the zombie velocity  vector, so that i points to the closes human & with max_zombie_speed
@@ -401,26 +399,12 @@ class entity:
         #get the distance
         distance_zombie_to_human = self.get_distance(position_nearest_human) 
         
-        #---TEMPORARY-NOTES-RAPHAEL---
-            #depending a bit where we end up actually checking if zombie can bite 
-            #human or not this can be changed
-            #(in plan kill radius function is placed in if entity == human branch)
-            #if we dont do kill radius here we have to pay attention, that we dont, 
-            #divided by zero uf they are perfectly on top of each other.
-            #for now:
-        if distance_zombie_to_human == 0:
-            raise ValueError("Division by zero in human_awareness_walk(): Zombie and Human are at the EXACT same spot! Check function for more Information; Raphael")
-            #possible solution?
-            #store this globaly ? epsilon = 1e-9 
-            # if distance_zombie_to_human > epsilon: or just do if == 0 make array 0.0,0.0
-            #     new_zombie_direction = zombie_to_human_vector / distance_zombie_to_human
-            # else:
-            #     # They are effectively in the same spot
-            #     new_zombie_direction = np.array([0.0, 0.0])
-        #-----------------------------
-        
-        
-        new_zombie_direction = zombie_to_human_vector / distance_zombie_to_human
+        #compare distance to really small float, so we never to a div by zero 
+        #in the line after
+        safe_distance = max(distance_zombie_to_human, math.nextafter(0, 1.0))
+
+        #get the new unit vector whichs points the zombi to the human
+        new_zombie_direction = zombie_to_human_vector / safe_distance
         
         #to this direction multiply the max_speed_Z to get new velocity of zombie and store it there
         self.change_velocity(new_zombie_direction * self.max_speed_Z)
