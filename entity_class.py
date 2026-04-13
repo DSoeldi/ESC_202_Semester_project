@@ -5,8 +5,8 @@ Created on Thu Apr  2 08:58:11 2026
 
 @author: raphaeltarabinicastellani
 """
-from globals import rng
 from priority_queue_class import prio_q
+from rng_seed import rng
 import numpy as np
 from copy import deepcopy
 
@@ -33,6 +33,13 @@ class entity:
         if not np.shape(vector) == (2,): raise(ValueError)
     
     @ staticmethod
+    def validate_param_dict(d):
+        """
+        static method to validate: param_dict
+        """
+        if not isinstance(d, dict): raise(ValueError)
+
+    @ staticmethod
     def validate_alerted(alerted):
         """
         static method to validate: alerted
@@ -50,89 +57,53 @@ class entity:
         if not isinstance(pq, prio_q): raise(TypeError)
         if not isinstance(pq.heap, list): raise (TypeError)
 
-    @ staticmethod
-    def validate_max_speed(max_speed):
-        """
-        static method to validate: max_speed_H, max_speed_Z
-        """
-        #---TEMPORARY-NOTES-ANAIS-----
-            # test if the max speed is within some range?... so if at some point we have variable max_speeds,
-            # we make sure it always is within some realistic range?
-        #-----------------------------
-        if not isinstance(max_speed, float): raise(ValueError)
-    
-    @ staticmethod
-    def validate_awareness_radius(awareness_r):
-        """
-        static method to validate: awareness_r_H,awareness_r_Z
-        """
-        if not isinstance(awareness_r, float): raise(ValueError)
-        #---TEMPORARY-NOTES-ANAIS-----
-            # test if the max awareness radius is within some realistic range?
-        #-----------------------------
 
-
-    def __init__(self, mode, pos, velocity = np.array((0.0,0.0)), alerted = False, 
-                 pos_alerter = None, max_speed_Z = 20.0, max_speed_H = 28.0, awareness_r_H = 0.02, awareness_r_Z = 0.015):
+    def __init__(self, mode, pos, param_dict, velocity = np.array((0.0,0.0)), alerted = False, 
+                 pos_alerter = None):
         """
         Initializes a simulation entity (Human or Zombie).
         
         Positional Args:
             mode (str):  
                 "Z" or "H" defines whether entity is a human or a zombie 
+            
             pos (np.array((x,y))):  
-                current position vector of entity                
+                current position vector of entity 
+            
+            param_dict (dictionary):
+                Containing import values.            
         
         Keyword Args:
             velocity (np.array((x,y))): 
                 current velocity vector of entity
                 Note: Should not be (0,0) to avoid division errors. ????
+            
             alerted (bool):
                 Is a zombie/human in my awareness radius?  
+            
             pos_alerter (np.array((x,y))):
-                position vector of alerting entity   
-            max_speed_Z (float) in [km/h]: 
-                Fixed max speed for zombies. It's the speed the zombie has when he wants to eat a human, meaning alerted == True
-            max_speed_H (float) in [km/h]: 
-                Fixed max speed for humans.
-            awareness_r_H (float) in [km]:
-                Awareness radius for a Human
-            awareness_r_Z (float) in [km]:
-                Awareness radius for a Zombie
-
-        Additional Attrb:
-            pq (prio_q):
-                Priority queue attribute for entity
+                position vector of alerting entity    
+            
+            pq (heap):
+                Priority queue for entity
         """
         
         self.mode = mode
         self.pos = pos
+        self.param_dict = param_dict
         self.velocity = velocity
         self.alerted = alerted
         self.pos_alerter = pos_alerter 
-        self.pq = pq()
-        self.max_speed_Z = max_speed_Z
-        self.max_speed_H = max_speed_H  # avg human sprint: 24-32km/h
-        self.awareness_r_H = awareness_r_H
-        self.awareness_r_Z = awareness_r_Z
-
-        
-        #---TEMPORARY-NOTES-ANAIS-----
-            # Should we add a variable, which stores the capacity of an entity to keep on running, 
-            # which is somehow calculated through some function of time/distance & velocity??
-        #-----------------------------
+        self.pq = prio_q()
         
         # Raise Value Error for wrong input
         self.validate_mode(self.mode)
         self.validate_vector(self.pos)
+        self.validate_param_dict(self.param_dict)
         self.validate_vector(self.velocity)
         self.validate_alerted(self.alerted)
         if isinstance(pos_alerter, np.ndarray) or pos_alerter != None: self.validate_vector(self.pos_alerter)
         if pq != None: self.validate_pq(self.pq)
-        self.validate_max_speed(self.max_speed_Z)
-        self.validate_max_speed(self.max_speed_H)
-        self.validate_awareness_radius(awareness_r_H)
-        self.validate_awareness_radius(awareness_r_Z)
 
     def __repr__(self):
         """ 

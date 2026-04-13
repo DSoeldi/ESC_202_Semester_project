@@ -13,7 +13,7 @@ class cell:
      
     @staticmethod
     def validate_entities(entities):
-        if not isinstance(entities, tuple): raise(TypeError)
+        if not isinstance(entities, list): raise(TypeError)
         for e in entities:
             if not isinstance(e, entity): raise(TypeError) 
     
@@ -52,8 +52,8 @@ class cell:
             RH (np.array((float, float))):
                 the coordinates of the "Right High" corner of the cell
                 RH[0] = x, RH[1] = y
-            all_ents ((entity, entity, ...)):
-                A tuple of entities contained within the ROOT cell
+            all_ents ([entity, entity, ...]):
+                A list of entities contained within the ROOT cell
 
         keyword args:
             enteties_idx_sort (((int, int, ...), (int, int, ...))):
