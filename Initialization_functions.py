@@ -33,9 +33,9 @@ def validate_awareness_radius(awareness_r):
     
 
 
-def create_parameter_dict(n_H, n_Z, timestep, n_steps, x_bounds, y_bounds, 
-                          awareness_r_H = 0.02, awareness_r_Z = 0.015, max_speed_H = 28.0, max_speed_Z = 20.0, 
-                          walking_speed_Z = 4.0, H_contr_flocking = 4, max_ents_cell = 6):
+def create_parameter_dict(n_H, n_Z, timestep, n_steps, x_bounds, y_bounds, root_cell = None, 
+                          awareness_r_H = None, awareness_r_Z = None, max_speed_H = None, max_speed_Z = None, 
+                          walking_speed_Z = None, H_contr_flocking = None, max_ents_cell = None):
     """
     function that creates the parameter dictionary
 
@@ -57,6 +57,9 @@ def create_parameter_dict(n_H, n_Z, timestep, n_steps, x_bounds, y_bounds,
         
         y_bounds (np.ndarray((float, float))):
             The y coordinates, marking the bounds of the Area to be simulated. (y_bounds[0] < y_bounds[1])
+
+        root_cell (cell):
+            The root cell containing all entities and all daughter cells.
         
         awareness_r_H (float) in [km]:
             Awareness radius for a human in which it can sense Zombies (& other humans). 
@@ -106,6 +109,7 @@ def create_parameter_dict(n_H, n_Z, timestep, n_steps, x_bounds, y_bounds,
     if not isinstance(n_steps, int): raise(TypeError)
     validate_bounds(x_bounds)
     validate_bounds(y_bounds)
+    # validate root cell?
     validate_awareness_radius(awareness_r_H)
     validate_awareness_radius(awareness_r_Z)
     validate_max_speed(max_speed_H)
@@ -136,13 +140,15 @@ def Initialize_entities(param_dict):
     # create human entities
     ents = [entity("H", np.array((np.random.uniform(param_dict["x_bounds"][0], param_dict["x_bounds"][1]), 
                                   np.random.uniform(param_dict["y_bounds"][0], param_dict["y_bounds"][1]))),
-                                  param_dict) 
-            for _ in range(param_dict["n_H"])]
+                                  param_dict,
+                                  i) 
+            for i in range(param_dict["n_H"])]
     # create zombie entities
     ents.extend([entity("Z", np.array((np.random.uniform(param_dict["x_bounds"][0], param_dict["x_bounds"][1]), 
                                        np.random.uniform(param_dict["y_bounds"][0], param_dict["y_bounds"][1]))),
-                                       param_dict) 
-            for _ in range(param_dict["n_Z"])])
+                                       param_dict,
+                                       i) 
+            for i in range(param_dict["n_Z"])])
     
     return ents
 

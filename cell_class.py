@@ -192,3 +192,25 @@ class cell:
         # recursive calls
         self.d_cells[0].partition()
         self.d_cells[1].partition()
+
+    def calc_dist2_cell_entity(self, ent, rOffset): 
+        """
+        Calculates the distance**2 (scalar) from entity (r) to nearest point of the cell (self).
+
+        Args: 
+            self (cell):
+                cell instance with which to calculate distance to entitiy.
+            ent (entity):
+                Entity instance for which to calulate distance to cell.
+            rOffset (np.ndarray(np.float64, np.float64)):
+                The offset which "places" the entity in another corner, to calculate with periodic boundaries
+        Returns: 
+            (np.float64) The minimal squared distance between the entity and cell.
+        """
+        r = ent.pos + rOffset
+        d1 = r - self.RH
+        d2 = self.LL - r
+        d1 = np.maximum(d1, d2) # returns the maximum for each position (so d1 = np.array( max(d1[0], d2[0]), max(d1[1], d2[1]))
+        d1 = np.maximum(d1, np.zeros_like(d1)) # replaces negative coordinates with 0
+        return d1.dot(d1)
+    

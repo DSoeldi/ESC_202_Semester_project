@@ -1,44 +1,49 @@
-from unittest import TestCase
+import unittest 
 from entity_class import entity
 import numpy as np
+from priority_queue_class import prio_q
 
-class test_entity(TestCase):
+class test_entity(unittest.TestCase):
 
     #------------------------------------------------------------------------- testing keyword args und positional args 
         # make sure positional args have to be given!
         # make sure keyword args can but don't have to be given
     def test_keyword_arg_mode_not_present(self):
         with self.assertRaises(Exception):
-            entity(pos = np.array([1.0,1.0]))
+            entity(np.array([1.0,1.0]), {"some_key": "some_value"}, 3)
 
     def test_keyword_arg_pos_not_present(self):
         with self.assertRaises(Exception):
-            entity("H")
+            entity("H", {"some_key": "some_value"}, 3)
+
+    def test_keyword_arg_param_dict_not_present(self):
+        with self.assertRaises(Exception):
+            entity("H", np.array([1.0,1.0]), 3)
+    
+    def test_keyword_idx_all_ents_not_present(self):
+        with self.assertRaises(Exception):
+            entity("H", np.array([1.0,1.0]), {"some_key": "some_value"})
         
 
     def test_positional_arg_velocity_not_present(self):
-        try: entity("H", np.array((1.0,1.0)), alerted = False, pos_alerter = None, pq = None, max_speed_Z = 20.0, max_speed_H = 20.0)
-        except TypeError: self.fail("raised TypeError")
+        try: entity("H", np.array([1.0,1.0]), {"some_key": "some_value"}, 3, alerted = False, 
+                    pos_alerter = None, pq = None, max_speed_Z = 20.0, max_speed_H = 20.0)
+        except Exception: self.fail("raised TypeError")
             
     def test_positional_arg_alerted_not_present(self):
-        try: entity("H", np.array((1.0,1.0)), velocity = np.array((1.0,1.0)), pos_alerter = None, pq = None, max_speed_Z = 20.0, max_speed_H = 20.0)
-        except TypeError: self.fail("raised TypeError")
+        try: entity("H", np.array([1.0,1.0]), {"some_key": "some_value"}, 3, velocity = np.array((1.0,1.0)), 
+                    pos_alerter = None, pq = None, max_speed_Z = 20.0, max_speed_H = 20.0)
+        except Exception: self.fail("raised TypeError")
           
     def test_positional_arg_pos_alerter_not_present(self):
-        try: entity("H", np.array((1.0,1.0)), velocity = np.array((1.0,1.0)), alerted = False, pq = None, max_speed_Z = 20.0, max_speed_H = 20.0)
-        except TypeError: self.fail("raised TypeError")
+        try: entity("H", np.array([1.0,1.0]), {"some_key": "some_value"}, 3, velocity = np.array((1.0,1.0)), 
+                    alerted = False, pq = None, max_speed_Z = 20.0, max_speed_H = 20.0)
+        except Exception: self.fail("raised TypeError")
             
     def test_positional_arg_pq_not_present(self):
-        try: entity("H", np.array((1.0,1.0)), velocity = np.array((1.0,1.0)), alerted = False, pos_alerter = None, max_speed_Z = 20.0, max_speed_H = 20.0)
-        except TypeError: self.fail("raised TypeError")
-            
-    def test_positional_arg_max_speed_Z_not_present(self):
-        try: entity("H", np.array((1.0,1.0)), velocity = np.array((1.0,1.0)), alerted = False, pos_alerter = None, pq = None, max_speed_H = 20.0)
-        except TypeError: self.fail("raised TypeError")
-            
-    def test_positional_arg_max_speed_H_not_present(self):
-        try: entity("H", np.array((1.0,1.0)), velocity = np.array((1.0,1.0)), alerted = False, pos_alerter = None, pq = None, max_speed_Z = 20.0)
-        except TypeError: self.fail("raised TypeError")
+        try: entity("H", np.array([1.0,1.0]), {"some_key": "some_value"}, 3, velocity = np.array((1.0,1.0)), 
+                    alerted = False, pos_alerter = None, max_speed_Z = 20.0, max_speed_H = 20.0)
+        except Exception: self.fail("raised TypeError")
 
 
     #------------------------------------------------------------------------- testing validate functions
@@ -63,11 +68,11 @@ class test_entity(TestCase):
 
 
     def test_validate_vector_not_ndarray(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             entity.validate_vector([3.0,5.0])
     
     def test_validate_vector_not_floats(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             entity.validate_vector(np.array((3,5)))
     
     def test_validate_vector_array_wrong_dim(self):
@@ -76,72 +81,88 @@ class test_entity(TestCase):
     
 
     def test_validate_alerted_not_bool(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             entity.validate_alerted("True")
-
     
-    def test_validate_pq_list(self):
-        # testing validate_pq:
-        # list not heap?? (possible?)
-        # --> can be none!
-        pass
+    def test_validate_alerted_correct(self):
+        try: entity.validate_alerted(True)
+        except Exception: self.fail("raised Exception")
 
 
-    def test_validate_max_speed_not_float(self):
+    def test_validate_idx_all_ents_not_int(self):
+        with self.assertRaises(TypeError):
+            entity.validate_idx_all_ents(3.3)
+    
+    def test_validate_idx_all_ents_negative_int(self):
         with self.assertRaises(ValueError):
-            entity.validate_max_speed(20)
+            entity.validate_idx_all_ents(-1)
     
-    # ?? within valid range?
+    def test_validate_idx_all_ents_correct(self):
+        try: entity.validate_idx_all_ents(0)
+        except Exception: self.fail("raised Exception")
+
+    
+    def test_validate_param_dict_not_dict(self):
+        with self.assertRaises(TypeError):
+            entity.validate_param_dict({2,3,4})
+    
+    def test_validate_param_dict_correct(self):
+        try: entity.validate_param_dict({"hello": 3})
+        except Exception: self.fail("raised Exception")
+
+
+    def test_validate_pq_not_list(self):
+        with self.assertRaises(TypeError):
+            entity.validate_pq(("not a list"))
+
+    def test_validate_pq_correct(self):
+        try: entity.validate_pq(prio_q())
+        except Exception: self.fail("raised Exception")
     
     #------------------------------------------------------------------------- testing __init__:
         # test all the variables get the value they we should be assigned through "entity(x, x1, x2, x3, ...)"
     
-    def define_entitie_for_init_test(self):
-        e_init = entity("Z", np.array((1.0,1.0)), np.array((1.5,1.7)), alerted = True, 
-                        pos_alerter = np.array((8.3, 1.0)), pq = None, max_speed_Z = 19.0, max_speed_H = 23.0)
+    def define_entity_for_init_test(self):
+        e_init = entity("Z", np.array((1.0,1.0)), {"some_key": "some_value"}, 3, velocity = np.array((1.5,1.7)), 
+                        alerted = True, pos_alerter = np.array((8.3, 1.0)))
         return e_init
     
     def test_init_mode(self):
-        e_init = self.define_entitie_for_init_test()
+        e_init = self.define_entity_for_init_test()
         self.assertEqual(e_init.mode, "Z")
     
     def test_init_pos(self):
-        e_init = self.define_entitie_for_init_test()
+        e_init = self.define_entity_for_init_test()
         self.assertTrue((e_init.pos == np.array((1.0,1.0))).all())
 
+    def test_init_param_dict(self):
+        e_init = self.define_entity_for_init_test()
+        self.assertTrue(e_init.param_dict == {"some_key": "some_value"})
+    
+    def test_init_idx_all_ents(self):
+        e_init = self.define_entity_for_init_test()
+        self.assertTrue(e_init.idx_all_ents == 3)
+
     def test_init_velocity(self):
-        e_init = self.define_entitie_for_init_test()
+        e_init = self.define_entity_for_init_test()
         self.assertTrue((e_init.velocity == np.array((1.5,1.7))).all())
 
     def test_init_alerted(self):
-        e_init = self.define_entitie_for_init_test()
+        e_init = self.define_entity_for_init_test()
         self.assertEqual(e_init.alerted, True)
 
     def test_init_pos_alerter(self):
-        e_init = self.define_entitie_for_init_test()
+        e_init = self.define_entity_for_init_test()
         self.assertTrue((e_init.pos_alerter == np.array((8.3, 1.0))).all())
-
-    def test_init_pq(self):
-        e_init = self.define_entitie_for_init_test()
-        self.assertEqual(e_init.pq, None)
-
-    def test_init_max_speed_Z(self):
-        e_init = self.define_entitie_for_init_test()
-        self.assertEqual(e_init.max_speed_Z, 19.0)
-
-    def test_init_max_speed_H(self):
-        e_init = self.define_entitie_for_init_test()
-        self.assertEqual(e_init.max_speed_H, 23.0)
-
 
     #------------------------------------------------------------------------- testing __eq__:
     def test_eq_returns_NotImplemented(self):
-        self.assertFalse((entity("Z", np.array((1.0,1.0))) == ["this is not an entity attribute"]))
+        self.assertFalse(entity("Z", np.array((1.0,1.0)), {"key": "value"}, 3) == ["this is not an entity attribute"])
     
     
     def define_entities_for_eq_test(self):
-        e1 = entity("Z", np.array((1.0,1.0)), np.array((1.5,1.7)), alerted = True, pos_alerter = np.array((8.3, 1.0)), pq = None, max_speed_Z = 19.0, max_speed_H = 23.0)
-        e2 = entity("Z", np.array((1.0,1.0)), np.array((1.5,1.7)), alerted = True, pos_alerter = np.array((8.3, 1.0)), pq = None, max_speed_Z = 19.0, max_speed_H = 23.0)
+        e1 = entity("Z", np.array((1.0,1.0)), {"key": "value"}, 3, np.array((1.5,1.7)), alerted = True, pos_alerter = np.array((8.3, 1.0)))
+        e2 = entity("Z", np.array((1.0,1.0)), {"key": "value"}, 3, np.array((1.5,1.7)), alerted = True, pos_alerter = np.array((8.3, 1.0)))
         return e1, e2
     
     def test_eq_returns_True(self):
@@ -184,19 +205,6 @@ class test_entity(TestCase):
         e1.pq = "H"
         self.assertNotEqual(e1, e2)
         e1.pq = None # change back
-    
-    def test_eq_returns_False_max_speed_Z(self):
-        e1, e2 = self.define_entities_for_eq_test()
-        e1.max_speed_Z = 11.3
-        self.assertNotEqual(e1, e2)
-        e1.max_speed_Z = 19.0 # change back
-    
-    def test_eq_returns_False_max_speed_H(self):
-        e1, e2 = self.define_entities_for_eq_test()
-        e1.max_speed_Z = 25.7
-        self.assertNotEqual(e1, e2)
-        e1.max_speed_Z = 23.0 # change back
-
 
     #------------------------------------------------------------------------- testing get functions:
     def test_get_speed_returns_float(self):
@@ -270,3 +278,9 @@ class test_entity(TestCase):
     
     def test_change_pq_changes_pq(self):
         pass
+
+
+
+# ---------------------------------RUN Test--------------------------------------
+if __name__ == '__main__':
+    unittest.main()
