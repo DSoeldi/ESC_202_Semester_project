@@ -103,7 +103,7 @@ class entity:
         self.validate_vector(self.velocity)
         self.validate_alerted(self.alerted)
         if isinstance(pos_alerter, np.ndarray) or pos_alerter != None: self.validate_vector(self.pos_alerter)
-        if pq != None: self.validate_pq(self.pq)
+        if prio_q != None: self.validate_pq(self.pq)
 
     def __repr__(self):
         """ 
