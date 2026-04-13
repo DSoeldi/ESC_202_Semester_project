@@ -5,6 +5,7 @@ Created on Thu Apr  2 08:58:11 2026
 
 @author: raphaeltarabinicastellani
 """
+from priority_queue_class import prio_q
 from rng_seed import rng
 import numpy as np
 from copy import deepcopy
@@ -53,11 +54,12 @@ class entity:
         """
         static method to validate: pq
         """
-        pass
+        if not isinstance(pq, prio_q): raise(TypeError)
+        if not isinstance(pq.heap, list): raise (TypeError)
 
 
     def __init__(self, mode, pos, param_dict, velocity = np.array((0.0,0.0)), alerted = False, 
-                 pos_alerter = None, pq = None):
+                 pos_alerter = None):
         """
         Initializes a simulation entity (Human or Zombie).
         
@@ -92,7 +94,7 @@ class entity:
         self.velocity = velocity
         self.alerted = alerted
         self.pos_alerter = pos_alerter 
-        self.pq = pq
+        self.pq = prio_q()
         
         # Raise Value Error for wrong input
         self.validate_mode(self.mode)
@@ -101,7 +103,7 @@ class entity:
         self.validate_vector(self.velocity)
         self.validate_alerted(self.alerted)
         if isinstance(pos_alerter, np.ndarray) or pos_alerter != None: self.validate_vector(self.pos_alerter)
-        # validate pq ??
+        if prio_q != None: self.validate_pq(self.pq)
 
     def __repr__(self):
         """ 
