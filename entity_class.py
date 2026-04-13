@@ -13,7 +13,6 @@ from copy import deepcopy
 
  #--------------------CLASS-ENTITY-START-ANAïS-----------------------------
 
- 
 class entity:
     @ staticmethod
     def validate_mode(mode):
@@ -27,9 +26,9 @@ class entity:
         """
         static method to validate: pos, velocity, pos_alerted vectors
         """
-        if not isinstance(vector, np.ndarray): raise(ValueError)
-        if not isinstance(vector[0], np.float64): raise(ValueError)
-        if not isinstance(vector[1], np.float64): raise(ValueError)
+        if not isinstance(vector, np.ndarray): raise(TypeError)
+        if not isinstance(vector[0], np.float64): raise(TypeError)
+        if not isinstance(vector[1], np.float64): raise(TypeError)
         if not np.shape(vector) == (2,): raise(ValueError)
     
     @ staticmethod
@@ -37,14 +36,23 @@ class entity:
         """
         static method to validate: param_dict
         """
-        if not isinstance(d, dict): raise(ValueError)
+        if not isinstance(d, dict): raise(TypeError)
+
+    @ staticmethod
+    def validate_idx_all_ents(i):
+        """
+        static method to validate: idx_all_ents
+        """
+        if not isinstance(i, int): raise(TypeError)
+        if i < 0: raise(ValueError)
+    
 
     @ staticmethod
     def validate_alerted(alerted):
         """
         static method to validate: alerted
         """
-        if not isinstance(alerted, bool): raise(ValueError)
+        if not isinstance(alerted, bool): raise(TypeError)
 
         # if alerted == True, pos_alerter, should not be None!!!
         # if alerted = False, pos_alerter should be None!!
@@ -58,8 +66,8 @@ class entity:
         if not isinstance(pq.heap, list): raise (TypeError)
 
 
-    def __init__(self, mode, pos, param_dict, velocity = np.array((0.0,0.0)), alerted = False, 
-                 pos_alerter = None):
+    def __init__(self, mode, pos, param_dict, idx_all_ents, velocity = np.array((0.0,0.0)), 
+                 alerted = False, pos_alerter = None):
         """
         Initializes a simulation entity (Human or Zombie).
         
@@ -71,7 +79,10 @@ class entity:
                 current position vector of entity 
             
             param_dict (dictionary):
-                Containing import values.            
+                Containing import values. 
+
+            idx_all_ents (int):
+                Index of this entity instance within the list containing all entities.     
         
         Keyword Args:
             velocity (np.array((x,y))): 
@@ -87,23 +98,25 @@ class entity:
             pq (heap):
                 Priority queue for entity
         """
-        
         self.mode = mode
         self.pos = pos
         self.param_dict = param_dict
+        self.idx_all_ents = idx_all_ents
         self.velocity = velocity
         self.alerted = alerted
         self.pos_alerter = pos_alerter 
         self.pq = prio_q()
         
-        # Raise Value Error for wrong input
+        # Raise Type/Value Error for wrong input
         self.validate_mode(self.mode)
         self.validate_vector(self.pos)
         self.validate_param_dict(self.param_dict)
+        self.validate_idx_all_ents(self.idx_all_ents)
         self.validate_vector(self.velocity)
         self.validate_alerted(self.alerted)
         if isinstance(pos_alerter, np.ndarray) or pos_alerter != None: self.validate_vector(self.pos_alerter)
         if prio_q != None: self.validate_pq(self.pq)
+
 
     def __repr__(self):
         """ 
@@ -122,6 +135,7 @@ class entity:
         
         return f"{self.mode}(pos: {np.round(self.pos, 2)}, v: {np.round(self.velocity, 2)}, alert: {self.alerted}, pos: {self.pos_alerter})"
     
+
     def __eq__(self, other):
         """
         Checks if 2 instances of entity are equal (all attributes are equal)
@@ -136,17 +150,17 @@ class entity:
             #    python will call entity2.__eq__(entity1)
             #  try A==B, -> false, ok so then try B==A
         #-----------------------------
-        
         if not isinstance(other, entity): return NotImplemented
         return ((self.mode == other.mode) and
                 (self.pos == other.pos).all() and 
+                (self.idx_all_ents == other.idx_all_ents) and
                 (self.velocity == other.velocity).all() and
                 (self.alerted == other.alerted) and
                 ((self.pos_alerter == other.pos_alerter).all() if (isinstance(self.pos_alerter, np.ndarray) or isinstance(other.pos_alerter, np.ndarray)) else self.pos_alerter == other.pos_alerter) and
-                (self.pq == other.pq) and 
-                (self.max_speed_Z == other.max_speed_Z) and 
-                (self.max_speed_H == other.max_speed_H))
+                (self.pq == other.pq)
+                )
     
+
     def get_speed(self):
         """
         calculates speed (scalar, no direction) from velocity vector
@@ -154,30 +168,8 @@ class entity:
         Returns:
             speed (int)
         """
-
-        #---TEMPORARY-NOTES-RAPHAEL---
-            #is quick math like this faster or with numpy?
-            # (velocity[0]**2 + velocity[1]**2)**0.5   
-            # np.linalg.norm(velocity) ?
-        #-----------------------------
         return (self.velocity[0]**2 + self.velocity[1]**2)**0.5 # magnitude of velocity vector
     
-    def get_direction(self):
-        #---TEMPORARY-NOTES-ANAIS-----
-            # isch die Funktion nötig ????
-            #vll bruchts de diego den im flocking behavior??
-            #--> when velocity 0,0 isch, isch speed 0,0, den gits da eh geteilt durch 0, wege
-            #    dem hani obe gschriebe Note: Should not be (0,0) to avoid division errors.
-            #    aber eigentlich au nice wenn amigs paar entities eifach ümestönd ? also mues mehr sicher
-            #    generell na apasse/ lösig finde
-        #-----------------------------
-        """
-        calculates direction (unit vector) from velocity vector
-        
-        Returns:
-            direction (np.array((x,y)))
-        """
-        return self.velocity / self.get_speed()
         
     def change_mode(self, new_mode):
         """
@@ -244,6 +236,85 @@ class entity:
         """
         self.validate_pq(new_pq) 
         self.pq = deepcopy(new_pq)
+
+    #--------------------kNN-START-ANAIS---------------------------------------
+    def calculate_dist2_entity(self, other_ent, offset):
+        """
+        Calculates the squared distance between 2 entities. 
+        Args:
+            self (entity)
+            other_ent (entity)
+            offset (np.ndarray(float, float)):
+                The offset by which to "move" the entity, to create periodic boundaries. 
+        Returns:
+            (float) the squared distance
+        """
+        dx = self.pos[0] + offset[0] - other_ent.pos[0]
+        dy = self.pos[1] + offset[1] - other_ent.pos[1]
+        return dx*dx + dy*dy
+    
+
+    def kNN(self):
+        """
+        Replaces old pq of entity with empty prio_q, then initiates kNN algorithm for this entity instance. And updates it's pq. 
+        
+        Args: 
+            self (entity with mode == "H)
+        """
+        if self.mode != "H": raise Warning("kNN was initiated for a Zombie!!!")
+        self.change_pq(prio_q()) # initiate a new pq for the next step, otherwise it will grow with each step 
+        self.kNN_loop_periodic_bounds() 
+
+
+    def kNN_loop_periodic_bounds(self):
+        """
+        Generates all combinations of: (x, y) in {0, +- Lx} x {0, +- Ly} and calls recursive neighbour_search algorithm 
+        on all of them to make sure that one can search "beyond edges".
+
+        Args:
+            self (entity):
+                The entity for which to find neighbours across periodic bounds.
+
+        Returns:
+            (prio_q) with a heap containing all entities found within periodic bounds.
+        """
+        period = (self.param_dict["x_bounds"][1] - self.param_dict["x_bounds"][0], 
+                  self.param_dict["y_bounds"][1] - self.param_dict["y_bounds"][0])
+
+        for y in [0.0, -period[1], period[1]]:
+            for x in [0.0, -period[0], period[0]]:
+                offset = np.array([x, y])
+                self.neighbor_search(self.param_dict["root_cell"], offset)
+
+     
+    def neighbor_search(self, curr_cell, offset):
+        """
+        Recursive Neighbour search algorithm which is recursive until a leaf cell is found. 
+        Then it checks whether the leaf cell si within the awareness radius and whether it contains 
+        entities within the awareness radius of self (entity.)
+
+        Args:
+            curr_cell (cell):
+                The cell we are currently at within the binary tree.
+
+            offset (np.ndarray(float, float)):
+                The offset by which to "move" the entity, to create periodic boundaries. 
+        """
+        if curr_cell.isleaf():
+            for p in curr_cell.ents_idx_sort[0]: 
+                if p != self.idx_all_ents: # compare indeces of both entities, to make sure we don't compare an entity with itself
+                    d = self.calculate_dist2_entity(curr_cell.all_ents[p], offset)
+                    if d <= (1000 * self.param_dict["awareness_r_H"])**2:
+                        self.pq.push((d, p))
+        else:
+            dist2_c1 = curr_cell.d_cells[0].calc_dist2_cell_entity(self, offset)
+            dist2_c2 = curr_cell.d_cells[1].calc_dist2_cell_entity(self, offset)
+
+             # check if distance to daughter cell is (partially) within the awareness radius, if so do recursive call for daughter cell
+            if dist2_c1 <= (1000 * self.param_dict["awareness_r_H"])**2:
+                self.neighbor_search(curr_cell.d_cells[0], offset)
+            if dist2_c2 <= (1000 * self.param_dict["awareness_r_H"])**2:
+                self.neighbor_search(curr_cell.d_cells[1], offset)
         
     #--------------------ZOMBIE-WALK-START-RAPHAEL-----------------------------
     
