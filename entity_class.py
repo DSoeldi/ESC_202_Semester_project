@@ -6,6 +6,7 @@ Created on Thu Apr  2 08:58:11 2026
 @author: raphaeltarabinicastellani
 """
 from globals import rng
+from priority_queue_class import prio_q
 import numpy as np
 from copy import deepcopy
 
@@ -46,7 +47,8 @@ class entity:
         """
         static method to validate: pq
         """
-        pass
+        if not isinstance(pq, prio_q): raise(TypeError)
+        if not isinstance(pq.heap, list): raise (TypeError)
 
     @ staticmethod
     def validate_max_speed(max_speed):
@@ -71,7 +73,7 @@ class entity:
 
 
     def __init__(self, mode, pos, velocity = np.array((0.0,0.0)), alerted = False, 
-                 pos_alerter = None, pq = None, max_speed_Z = 20.0, max_speed_H = 28.0, awareness_r_H = 0.02, awareness_r_Z = 0.015):
+                 pos_alerter = None, max_speed_Z = 20.0, max_speed_H = 28.0, awareness_r_H = 0.02, awareness_r_Z = 0.015):
         """
         Initializes a simulation entity (Human or Zombie).
         
@@ -88,9 +90,7 @@ class entity:
             alerted (bool):
                 Is a zombie/human in my awareness radius?  
             pos_alerter (np.array((x,y))):
-                position vector of alerting entity    
-            pq (heap):
-                Priority queue for entity
+                position vector of alerting entity   
             max_speed_Z (float) in [km/h]: 
                 Fixed max speed for zombies. It's the speed the zombie has when he wants to eat a human, meaning alerted == True
             max_speed_H (float) in [km/h]: 
@@ -99,6 +99,10 @@ class entity:
                 Awareness radius for a Human
             awareness_r_Z (float) in [km]:
                 Awareness radius for a Zombie
+
+        Additional Attrb:
+            pq (prio_q):
+                Priority queue attribute for entity
         """
         
         self.mode = mode
@@ -106,7 +110,7 @@ class entity:
         self.velocity = velocity
         self.alerted = alerted
         self.pos_alerter = pos_alerter 
-        self.pq = pq 
+        self.pq = pq()
         self.max_speed_Z = max_speed_Z
         self.max_speed_H = max_speed_H  # avg human sprint: 24-32km/h
         self.awareness_r_H = awareness_r_H
@@ -114,7 +118,7 @@ class entity:
 
         
         #---TEMPORARY-NOTES-ANAIS-----
-            # Should we add a varaiable, which stores the capacity of an entity to keep on running, 
+            # Should we add a variable, which stores the capacity of an entity to keep on running, 
             # which is somehow calculated through some function of time/distance & velocity??
         #-----------------------------
         
@@ -124,7 +128,7 @@ class entity:
         self.validate_vector(self.velocity)
         self.validate_alerted(self.alerted)
         if isinstance(pos_alerter, np.ndarray) or pos_alerter != None: self.validate_vector(self.pos_alerter)
-        # validate pq ??
+        if pq != None: self.validate_pq(self.pq)
         self.validate_max_speed(self.max_speed_Z)
         self.validate_max_speed(self.max_speed_H)
         self.validate_awareness_radius(awareness_r_H)
