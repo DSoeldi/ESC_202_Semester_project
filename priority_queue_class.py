@@ -1,58 +1,45 @@
 from heapq import *
-import numpy as np
 
-class pq:
-    @staticmethod
-    def validate_k():
-        pass
+class prio_q:
 
     @staticmethod
-    def validate_k():
-        pass
+    def validate_push_item(item):
+        if not isinstance(item, tuple): raise(TypeError)
+        if not isinstance(item[0], float): raise(TypeError)
+        if item[0] < 0: raise(ValueError)
+        if not isinstance(item[1], int): raise(TypeError)
 
-    def __init__(self, k):
+    def __init__(self):
         """
-        Stores k best (nearest) candidates; heap[0] is the current worst among them.
-
-        Args: 
-            k (int):
-                ????????????????
+        Stores candidates within entity's awareness radius; heap[0] is the current nearest among them.
         """
         self.heap = []
-        sentinel = (-np.inf, None) # starter value (infinitely far away, so that any entity found will intially be "close enough")
-
-        # find a way to not store k nearest, but all nearest within x distance!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # this has to be chnaged somehow!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        for i in range(k):
-            heappush(self.heap, sentinel) # pushes the new element (sentinel) to a place in the binary tree structure of a heap wich is valid
     
-    def replace(self, dist2, ent_idx):
+    def push(self, item):
         """
-        Replaces current worst element among the k kept ones in the heap.
-
-        Args:
-            self (pq): 
-                pq instance for which to change heap
-             dist2 ():
-                distance**2 between the entity to which this pq belongs and ent_idx (- distance of entity to query entity)
-             ent_idx (int):
-                index of the entity within entities, which was added to the heap
-        
-        Returns:
-            None
+        pushes ent = (dist2, ent_idx) to a place in the binary tree structure of a heap which is valid
+            Args:
+                ent ((float, int)):
+                    Tuple containing negative distance of query entity to the one this pq belongs to and it's index within the entities list ((-dist2, ent_idx))
+            Returns: 
+                None
         """
-        heapreplace(self.heap, (-dist2, ent_idx))
+        self.validate_push_item(item)
+        heappush(self.heap, item)  
 
     def key(self):
         """
-        Returns the current "cutoff" key, largest dist**2 within current heap = kth nearest neighbour
-        Equals to maximum search radius.
+        Returns the current nearest key, smallest dist**2 within current heap == nearest neighbour
         """
-        return -self.heap[0][0] # key = - dist2 (we want a max heap!)
+        return self.heap[0][0] # key = dist2
     
     def __str__(self):
         """Function for printing the Priotity queue."""
         return f"pq({self.heap})"
+    
+    def __eq__(self, other):
+        if not isinstance(other, prio_q): return NotImplemented
+        return self.heap == other.heap
 
 
 
