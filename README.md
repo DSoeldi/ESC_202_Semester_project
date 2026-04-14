@@ -38,6 +38,7 @@ Google Docs: https://docs.google.com/document/d/1POh07QEm5y5eyBowOd3Yyox-G9CZ4kU
 
 ## 10.04.2026
 min heap oder max heap? jenachdem muss flocking geändert werden da dort im heap gesliced wird.
+-> mean heap (chlinsti distanz ganz vorne)
 
 
 ## future?
