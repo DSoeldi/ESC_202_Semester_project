@@ -27,9 +27,6 @@ Google Docs: https://docs.google.com/document/d/1POh07QEm5y5eyBowOd3Yyox-G9CZ4kU
 - also use in params dictionary. the speed zombie have when they are random walking. do not use get_speed 
 
 ## @anais
-- remove get_direction????
-- raphael schreiben, wenn knn fertig
-
 
 ## @diego
 - min heap oder max heap? jenachdem muss flocking geändert werden da dort im heap gesliced wird.
