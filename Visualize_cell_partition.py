@@ -15,6 +15,7 @@ plt.figure(figsize = (10,10))
 fig, ax = plt.subplots()
 
 
+# ---------------------------Start Plotting---------------------------
 # plot particles 
 for e in entities:
     ax.plot(e.pos[0], e.pos[1], 'o', markersize = 1.5, color = "red" if e.mode == "Z" else "blue")
@@ -59,7 +60,7 @@ def highlight_random_entities_and_neighbours(n): # n = number of random entities
         ax.add_patch(circ)
 
         # plot randomly chosen entity
-        ax.plot(ent.pos[0], ent.pos[1], 's', markersize = 2.5, color = "blue") 
+        ax.plot(ent.pos[0], ent.pos[1], 's', markersize = 4, color = "blue") 
 
         # plot nieghbours of randomly chosen p
         for p in ent.pq.heap:

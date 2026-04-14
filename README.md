@@ -12,6 +12,10 @@ Google Docs: https://docs.google.com/document/d/1POh07QEm5y5eyBowOd3Yyox-G9CZ4kU
     - entitiy class:
         - added an attribute idx_all_ents. Index of an entity index within the entity class
         - added kNN relevant functions 
+        - intiate kNN by calling: __entity.kNN()__
+            - this calls ther periodic kNN algorithm automatically!!!
+            - and __updates the pq automatically__
+            - __do not do kNN for Zombies!__ Will raise warning. Way more efficient if we only call it on humans, and update Zombies, when it pops up in a human pq
 
 
 ## @raphi
