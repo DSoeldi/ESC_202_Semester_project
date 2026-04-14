@@ -52,7 +52,6 @@ def highlight_random_entities_and_neighbours(n): # n = number of random entities
         while entities[i].mode != "H": # Zombies do not have a pq!!!!!
             i = rd.randint(0, len(entities)-1)
         ent = entities[i]
-        print(f"pq of ent: {ent.pq}")
 
         # plot circle with radius = awareness_r_H 
         circ = plt.Circle((ent.pos[0], ent.pos[1]), radius = parameter_dict["awareness_r_H"]* 1000, 
