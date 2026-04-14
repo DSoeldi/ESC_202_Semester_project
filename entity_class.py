@@ -88,8 +88,8 @@ class entity:
         #-----------------------------
 
 
-    def __init__(self, mode, pos, velocity = np.array((0.0,0.0)), alerted = False, 
-                 pos_alerter = None, max_speed_Z = 20.0, max_speed_H = 28.0, awareness_r_H = 0.02, awareness_r_Z = 0.015):
+    def __init__(self, mode, pos, param_dict, idx_all_ents, velocity = np.array((0.0,0.0)), 
+                 alerted = False, pos_alerter = None):
         """
         Initializes a simulation entity (Human or Zombie).
         
@@ -585,16 +585,13 @@ class entity:
 
         Args: 
             None            
-            None            
         
         Returns:
             none
         """
         # check if human is alone
-
-        # check if human is alone
-
-
+        if len(self.pq.heap) == 0:
+            self.change_velocity(self.param_dict["max_speed_H"])
         # check if human is alerted
         if self.alerted: 
             self.zombie_awareness()
@@ -612,6 +609,15 @@ class entity:
         self.pos += self.velocity * timestep
 
         # periodic boundaries
+        if self.pos[0]>=self.param_dict["x_bounds"][1]: # check upper x bound
+            self.pos[0]-=self.param_dict["x_bounds"][1]
+        if self.pos[0]<=self.param_dict["x_bounds"][0]: # check lower x bound
+            self.pos[0]+=self.param_dict["x_bounds"][1]
+        if self.pos[1]>=self.param_dict["y_bounds"][1]: # check upper y bound
+            self.pos[1]-=self.param_dict["y_bounds"][1]
+        if self.pos[1]<=self.param_dict["y_bounds"][0]: # check lower y bound
+            self.pos[1]+=self.param_dict["y_bounds"][1]
+
         
             
     
