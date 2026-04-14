@@ -27,22 +27,22 @@ class test_entity(unittest.TestCase):
 
     def test_positional_arg_velocity_not_present(self):
         try: entity("H", np.array([1.0,1.0]), {"some_key": "some_value"}, 3, alerted = False, 
-                    pos_alerter = None, pq = None, max_speed_Z = 20.0, max_speed_H = 20.0)
+                    pos_alerter = None)
         except Exception: self.fail("raised TypeError")
             
     def test_positional_arg_alerted_not_present(self):
         try: entity("H", np.array([1.0,1.0]), {"some_key": "some_value"}, 3, velocity = np.array((1.0,1.0)), 
-                    pos_alerter = None, pq = None, max_speed_Z = 20.0, max_speed_H = 20.0)
+                    pos_alerter = None)
         except Exception: self.fail("raised TypeError")
           
     def test_positional_arg_pos_alerter_not_present(self):
         try: entity("H", np.array([1.0,1.0]), {"some_key": "some_value"}, 3, velocity = np.array((1.0,1.0)), 
-                    alerted = False, pq = None, max_speed_Z = 20.0, max_speed_H = 20.0)
+                    alerted = False)
         except Exception: self.fail("raised TypeError")
             
     def test_positional_arg_pq_not_present(self):
         try: entity("H", np.array([1.0,1.0]), {"some_key": "some_value"}, 3, velocity = np.array((1.0,1.0)), 
-                    alerted = False, pos_alerter = None, max_speed_Z = 20.0, max_speed_H = 20.0)
+                    alerted = False, pos_alerter = None)
         except Exception: self.fail("raised TypeError")
 
 
@@ -77,15 +77,15 @@ class test_entity(unittest.TestCase):
     
     def test_validate_vector_array_wrong_dim(self):
         with self.assertRaises(ValueError):
-            entity.validate_vector(np.array((3,5,6)))
+            entity.validate_vector(np.array((3.0,5.0,6.0)))
     
 
-    def test_validate_alerted_not_bool(self):
+    def test_validate_param_dict_not_dict(self):
         with self.assertRaises(TypeError):
-            entity.validate_alerted("True")
+            entity.validate_param_dict({2,3,4})
     
-    def test_validate_alerted_correct(self):
-        try: entity.validate_alerted(True)
+    def test_validate_param_dict_correct(self):
+        try: entity.validate_param_dict({"hello": 3})
         except Exception: self.fail("raised Exception")
 
 
@@ -100,20 +100,27 @@ class test_entity(unittest.TestCase):
     def test_validate_idx_all_ents_correct(self):
         try: entity.validate_idx_all_ents(0)
         except Exception: self.fail("raised Exception")
+    
 
-    
-    def test_validate_param_dict_not_dict(self):
+    def test_validate_alerted_not_bool(self):
         with self.assertRaises(TypeError):
-            entity.validate_param_dict({2,3,4})
+            entity.validate_alerted("True")
     
-    def test_validate_param_dict_correct(self):
-        try: entity.validate_param_dict({"hello": 3})
+    def test_validate_alerted_correct(self):
+        try: entity.validate_alerted(True)
         except Exception: self.fail("raised Exception")
 
 
-    def test_validate_pq_not_list(self):
+    def test_validate_pq_heap_not_list(self):
+        pq1 = prio_q()
+        pq1.heap = "not a list"
         with self.assertRaises(TypeError):
-            entity.validate_pq(("not a list"))
+            entity.validate_pq(pq1)
+    
+    def test_validate_pq_not_prio_q(self):
+        pq1 = "not_prio_q"
+        with self.assertRaises(TypeError):
+            entity.validate_pq(pq1)
 
     def test_validate_pq_correct(self):
         try: entity.validate_pq(prio_q())
@@ -173,7 +180,6 @@ class test_entity(unittest.TestCase):
         e1, e2 = self.define_entities_for_eq_test()
         e1.mode = "H"
         self.assertNotEqual(e1, e2)
-        e1.mode = "Z" # change back
     
     def test_eq_returns_False_pos(self):
         e1, e2 = self.define_entities_for_eq_test()
@@ -181,30 +187,25 @@ class test_entity(unittest.TestCase):
         self.assertNotEqual(e1, e2)
         e1.pos = np.array((1.0,1.0)) # change back
     
+    def test_eq_returns_False_idx_all_ents(self):
+        e1, e2 = self.define_entities_for_eq_test()
+        e1.idx_all_ents = 5
+        self.assertNotEqual(e1, e2)
+    
     def test_eq_returns_False_velocity(self):
         e1, e2 = self.define_entities_for_eq_test()
         e1.velocity = np.array((1.5,9.1))
         self.assertNotEqual(e1, e2)
-        e1.velocity = np.array((1.5,1.7)) # change back
     
     def test_eq_returns_False_alerted(self):
         e1, e2 = self.define_entities_for_eq_test()
         e1.alerted = False
         self.assertNotEqual(e1, e2)
-        e1.alerted = True # change back
     
     def test_eq_returns_False_pos_alerter(self):
         e1, e2 = self.define_entities_for_eq_test()
         e1.pos_alerter = np.array((0.0, 1.0))
         self.assertNotEqual(e1, e2)
-        e1.pos_alerter = np.array((8.3, 1.0)) # change back
-    
-    def test_eq_returns_False_pq(self):
-        e1, e2 = self.define_entities_for_eq_test()
-        pass # finish here !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        e1.pq = "H"
-        self.assertNotEqual(e1, e2)
-        e1.pq = None # change back
 
     #------------------------------------------------------------------------- testing get functions:
     def test_get_speed_returns_float(self):
@@ -215,60 +216,47 @@ class test_entity(unittest.TestCase):
         e1, e2 = self.define_entities_for_eq_test()
         self.assertAlmostEqual(e1.get_speed(), np.linalg.norm(e1.velocity))
 
-
-    def test_get_direction_returns_nparray(self):
-        e1, e2 = self.define_entities_for_eq_test()
-        self.assertIsInstance(e1.get_direction(), np.ndarray)
-    
-    def test_get_direction_returns_nparray_correct_dim(self):
-        e1, e2 = self.define_entities_for_eq_test()
-        self.assertEqual(np.shape(e1.get_direction()), (2,))
-        
-    def test_get_direction_returns_correct_direction(self):
-        e1, e2 = self.define_entities_for_eq_test()
-        pass
-
     #------------------------------------------------------------------------- testing change functions:
     def test_change_mode_calls_validate_mode(self):
-        e = entity("H", np.array((1.0,1.0)))
+        e = entity("Z", np.array((1.0,1.0)), {"key": "value"}, 3)
         with self.assertRaises(ValueError):
             e.change_mode("z")
     
     def test_change_mode_changes_mode(self):
-        e = entity("H", np.array((1.0,1.0)))
+        e = entity("Z", np.array((1.0,1.0)), {"key": "value"}, 3)
         e.change_mode("Z")
         self.assertEqual(e.mode, "Z")
 
     
     def test_change_pos_calls_validate_vector(self):
-        e = entity("H", np.array((1.0,1.0)))
+        e = entity("Z", np.array((1.0,1.0)), {"key": "value"}, 3)
         with self.assertRaises(ValueError):
             e.change_pos(np.array((1.0,1.0, 3.3)))
     
     def test_change_pos_changes_pos(self):
-        e = entity("H", np.array((1.0,1.0)))
+        e = entity("Z", np.array((1.0,1.0)), {"key": "value"}, 3)
         e.change_pos(np.array((4.0,5.0)))
         self.assertTrue((e.pos == np.array((4.0,5.0))).all())
         
 
     def test_change_alerted_calls_validate_alerted(self):
-        e = entity("H", np.array((1.0,1.0)), alerted = True)
-        with self.assertRaises(ValueError):
+        e = entity("Z", np.array((1.0,1.0)), {"key": "value"}, 3, alerted = True)
+        with self.assertRaises(TypeError):
             e.change_alerted("blabla")
     
     def test_change_alerted_changes_alerted(self):
-        e = entity("H", np.array((1.0,1.0)), alerted = True)
+        e = entity("Z", np.array((1.0,1.0)), {"key": "value"}, 3, alerted = True)
         e.change_alerted(False)
         self.assertFalse(e.alerted)
 
 
     def test_change_pos_alerter_calls_validate_vector(self):
-        e = entity("H", np.array((1.0,1.0)), pos_alerter = np.array((4.0,1.0)))
+        e = entity("Z", np.array((1.0,1.0)), {"key": "value"}, 3, pos_alerter = np.array((4.0,1.0)))
         with self.assertRaises(ValueError):
             e.change_pos_alerter(np.array((1.0, 1.0, 3.3)))
     
     def test_change_pos_alerter_changes_pos_alerter(self):
-        e = entity("H", np.array((1.0,1.0)), pos_alerter = np.array((4.0,1.0)))
+        e = entity("Z", np.array((1.0,1.0)), {"key": "value"}, 3, pos_alerter = np.array((4.0,1.0)))
         e.change_pos_alerter(np.array((4.0,5.0)))
         self.assertTrue((e.pos_alerter == np.array((4.0,5.0))).all())
     
