@@ -21,8 +21,8 @@ def step_update(timestep, entities, root_cell):
                                             # sorrounding it at the moment
             entity.zombie_walk()            # update velocity and direction of zombie walk based on 
                                             # prioq
-
-        if entity.mode == "H": 
+            
+        elif entity.mode == "H": 
             entity.kill_radius()            # check if human is in the kill radius of zombie
                                             # needs to happen at "end of last step" so at beginning
                                             # of this one is also possible. otherwise there would
@@ -36,4 +36,10 @@ def step_update(timestep, entities, root_cell):
         # this has to happen in its own loop because if not, the gradual updating of the location
         # will change the way the simulation runs. some humans will be updated before some zombies
         # even have the chance to move. 
-        entity.update_location()
+        entity.update_location(timestep)
+
+        ## check if silent/dead/deceased/gone/in hell
+
+
+
+

@@ -399,9 +399,10 @@ class entity:
         Raises:
             Relevant Entities needs to be at least 1 for the flocking to work
         """
+
+        relevant_entities = self.pq[0:n_humans] # number of relevant objects that are looped over
         if relevant_entities<1:
             raise ValueError("relevant entities is zero when it should be at least 1")
-        relevant_entities = self.pq[0:n_humans] # number of relevant objects that are looped over
         avoidfactor, matchingfactor, centeringfactor = factors
 
         # average values to influence pattern
@@ -475,6 +476,8 @@ class entity:
             timestep[double]: Timestep used to update the location of entity
         """
         self.pos += self.velocity * timestep
+
+        # periodic boundaries
         
             
     
