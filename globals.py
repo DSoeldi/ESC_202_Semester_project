@@ -4,7 +4,7 @@ import numpy as np
 
 #-----------------------------------------------Innitialize parameters--------------------------------------------
 parameter_dict = create_parameter_dict(n_H = 100,
-                                       n_Z = 30,
+                                       n_Z = 10,
                                        timestep = 0.00028,                      
                                        n_steps = 30, 
                                        x_bounds = np.array((0.0,100.0)),
@@ -23,3 +23,5 @@ root_cell = Initialize_root_cell(parameter_dict, entities)
 #-----------------------------------------------Initialize partitioning--------------------------------------------
 root_cell.partition()
 #------------------------------------------------------------------------------------------------------------------
+
+parameter_dict["root_cell"] = root_cell

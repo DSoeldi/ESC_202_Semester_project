@@ -7,6 +7,16 @@ Google Docs: https://docs.google.com/document/d/1POh07QEm5y5eyBowOd3Yyox-G9CZ4kU
 
 ## files created
 
+## Recently added to file:
+- 13.04 (ANAIS): 
+    - entitiy class:
+        - added an attribute idx_all_ents. Index of an entity index within the entity class
+        - added kNN relevant functions 
+        - intiate kNN by calling: __entity.kNN()__
+            - this calls ther periodic kNN algorithm automatically!!!
+            - and __updates the pq automatically__
+            - __do not do kNN for Zombies!__ Will raise warning. Way more efficient if we only call it on humans, and update Zombies, when it pops up in a human pq
+
 
 ## @raphi
 - to do: . kill radius, do after knn anais
@@ -19,7 +29,7 @@ Google Docs: https://docs.google.com/document/d/1POh07QEm5y5eyBowOd3Yyox-G9CZ4kU
 ## @anais
 - remove get_direction????
 - raphael schreiben, wenn knn fertig
-- remove: "(self.max_speed_Z == other.max_speed_Z) and (self.max_speed_H == other.max_speed_H))" from entity.__eq__ function
+
 
 ## @diego
 - min heap oder max heap? jenachdem muss flocking geändert werden da dort im heap gesliced wird.
@@ -28,6 +38,7 @@ Google Docs: https://docs.google.com/document/d/1POh07QEm5y5eyBowOd3Yyox-G9CZ4kU
 
 ## 10.04.2026
 min heap oder max heap? jenachdem muss flocking geändert werden da dort im heap gesliced wird.
+-> mean heap (chlinsti distanz ganz vorne)
 
 
 ## future?
