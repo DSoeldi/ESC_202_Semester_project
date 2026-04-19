@@ -357,9 +357,14 @@ class entity:
         if curr_cell.isleaf():
             for p in curr_cell.ents_idx_sort[0]: 
                 if p != self.idx_all_ents: # compare indeces of both entities, to make sure we don't compare an entity with itself
-                    d = self.calculate_dist2_entity(curr_cell.all_ents[p], offset)
+                    curr_ent = curr_cell.all_ents[p]
+                    d = self.calculate_dist2_entity(curr_ent, offset)
                     if d <= (1000 * self.param_dict["awareness_r_H"])**2:
                         self.pq.push((d, p))
+                    if curr_ent.mode == "Z" and d<= (1000 * self.param_dict["awareness_r_Z"])**2: # if the entity were looking at is a zombie, it gets the distance and the index of the human in its pq
+                        curr_ent.pq.push((d,self.idx_all_ents))
+
+
         else:
             dist2_c1 = curr_cell.d_cells[0].calc_dist2_cell_entity(self, offset)
             dist2_c2 = curr_cell.d_cells[1].calc_dist2_cell_entity(self, offset)
@@ -510,7 +515,7 @@ class entity:
         self.change_velocity(run_direction*self.max_speed_H)
 
 
-    def flocking_behavior(self, n_humans = 4, min_distance = 1, factors = (0.3,0.2,0.2)):
+    def flocking_behavior(self, entity_list, n_humans = 4, min_distance = 1, factors = (0.3,0.2,0.2)):
         """
         flocking behavior for humans when no zombies are close to them. they include the closest few 
         humans (n_humans) in their flocking behavior. 
@@ -529,8 +534,8 @@ class entity:
             Relevant Entities needs to be at least 1 for the flocking to work
         """
 
-        relevant_entities = self.pq[0:n_humans] # number of relevant objects that are looped over
-        if relevant_entities<1:
+        relevant_entities = self.pq.heap[0:n_humans] # number of relevant objects that are looped over
+        if len(relevant_entities)<1:
             raise ValueError("relevant entities is zero when it should be at least 1")
         avoidfactor, matchingfactor, centeringfactor = factors
 
@@ -540,7 +545,12 @@ class entity:
         xvel_avg = 0
         yvel_avg = 0
 
-        for other in relevant_entities:
+        for _,ent_idx in relevant_entities:
+            # diegos temporary notes
+            # there is a problem here with the fact that the entities in the pq are not the actual entities 
+            # but their indexes. how do i get the entity list in here??
+            other = entity_list[ent_idx]
+            
 
             # Separation if entity is in close range
             close_dx = 0
@@ -574,7 +584,7 @@ class entity:
                             (close_dy*avoidfactor))
                                          
 
-    def human_walk(self):
+    def human_walk(self, entity_list):
         """
         defines the humans walk cycle by checking if there is a zombie in the prioq or not. 
         If there is none, flocking behavior is activated, if a zombie is present, 
@@ -591,12 +601,12 @@ class entity:
         """
         # check if human is alone
         if len(self.pq.heap) == 0:
-            self.change_velocity(self.param_dict["max_speed_H"])
+            self.change_velocity(self.param_dict["max_speed_H"]*np.array((1,1))) #### fix this to some other velocity
         # check if human is alerted
         if self.alerted: 
             self.zombie_awareness()
         else:
-            self.flocking_behavior(n_humans = 4, min_distance = 1)
+            self.flocking_behavior(entity_list, n_humans = 4, min_distance = 1)
 
 
     def update_location(self, timestep):
