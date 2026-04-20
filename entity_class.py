@@ -9,7 +9,7 @@ from rng_seed import rng
 from priority_queue_class import prio_q
 import numpy as np
 from copy import deepcopy
-
+import math
 
  #--------------------CLASS-ENTITY-START-ANAïS-----------------------------
 
@@ -271,11 +271,11 @@ class entity:
 
     def change_pos_alerter(self, new_pos_alerter):
         """
-        changes alerted attribute for entity & validates it's type
+        changes pos_alerter attribute for entity & validates it's type
         
         Args:
             self (entity)
-            new_alerted (bool)
+            new_pos_alerter (np.ndarray((x,y)))
         """
         if isinstance(new_pos_alerter, np.ndarray) or new_pos_alerter != None: self.validate_vector(new_pos_alerter) 
         self.pos_alerter = deepcopy(new_pos_alerter)
@@ -377,12 +377,12 @@ class entity:
         
     #--------------------ZOMBIE-WALK-START-RAPHAEL-----------------------------
     
-    def zombie_walk(self, position_nearest_human):
+    def zombie_walk(self, entities):
         """
         Checks the alert state and executes the appropriate walk behavior.
     
         Args:
-            position_nearest_human (np.ndarray): The (x, y) coordinates of the target human.
+            entities (list): list filled with all entities.
             
         Returns:
             None: continues by calling the function for the type of walk the zombie will do
@@ -394,13 +394,10 @@ class entity:
         #entity.direction according to the if statements down below, it does
         #not however actually DO the step!
         
-        #position_nearest_human ->this position_nearest_human should come 
-        #from knn somehow, we defind it to come from there in our document 
-        
         if self.alerted:
             #there is a humans close!
             #lets go check where the human is and adjust our velocity
-            self.human_awareness_walk(position_nearest_human)
+            self.human_awareness_walk(entities)
             
         else: 
             #mhm no food for me (zombie) right know...
@@ -438,21 +435,28 @@ class entity:
         
         return 
     
-    def human_awareness_walk(self, position_nearest_human):
+    def human_awareness_walk(self, entities):
         """
         Adjusts the zombie's velocity to chase the nearest human with max speed.
     
         Args:
-            position_nearest_human (np.ndarray)): The (x, y) coordinates of the target human.
+            entities (list): list filled with all entities.
     
         Returns:
             None: Updates self.velocity directly.
-            
-        Raises:
-            ValueError: If the zombie and human are at the exact same position.
         """
         ##INFO
         #change the zombie velocity  vector, so that i points to the closes human & with max_zombie_speed
+        
+        #get index closest human in zombi heap = [(dist2, ent_idx), ...,...,...]
+        ent_idx = self.heap[0][1]
+        
+        #get position of this nearest human by using his index
+        position_nearest_human = entities[ent_idx].pos
+        
+        #now that we finally know the alerter human for the zombie we can store it, not
+        #really necessary but if we ever want to check who the alerter was we can check for it easily
+        self.change_pos_alerter(position_nearest_human) 
 
         #get vector from position zombie pointing to position human
         zombie_to_human_vector = position_nearest_human - self.pos
@@ -460,26 +464,12 @@ class entity:
         #get the distance
         distance_zombie_to_human = self.get_distance(position_nearest_human) 
         
-        #---TEMPORARY-NOTES-RAPHAEL---
-            #depending a bit where we end up actually checking if zombie can bite 
-            #human or not this can be changed
-            #(in plan kill radius function is placed in if entity == human branch)
-            #if we dont do kill radius here we have to pay attention, that we dont, 
-            #divided by zero uf they are perfectly on top of each other.
-            #for now:
-        if distance_zombie_to_human == 0:
-            raise ValueError("Division by zero in human_awareness_walk(): Zombie and Human are at the EXACT same spot! Check function for more Information; Raphael")
-            #possible solution?
-            #store this globaly ? epsilon = 1e-9 
-            # if distance_zombie_to_human > epsilon: or just do if == 0 make array 0.0,0.0
-            #     new_zombie_direction = zombie_to_human_vector / distance_zombie_to_human
-            # else:
-            #     # They are effectively in the same spot
-            #     new_zombie_direction = np.array([0.0, 0.0])
-        #-----------------------------
-        
-        
-        new_zombie_direction = zombie_to_human_vector / distance_zombie_to_human
+        #compare distance to really small float, so we never to a div by zero 
+        #in the line after
+        safe_distance = max(distance_zombie_to_human, math.nextafter(0, 1.0))
+
+        #get the new unit vector whichs points the zombi to the human
+        new_zombie_direction = zombie_to_human_vector / safe_distance
         
         #to this direction multiply the max_speed_Z to get new velocity of zombie and store it there
         self.change_velocity(new_zombie_direction * self.max_speed_Z)
@@ -487,6 +477,42 @@ class entity:
         return 
     
     #--------------------ZOMBIE-WALK-FINISH-RAPHAEL----------------------------
+    #--------------------check_infection-START-RAPHAEL-----------------------------
+    def check_infection_H(self, param_dict):
+        """
+        Checks if a Human entity is close enough to a Zombie to be bitten.
+        
+        Args: param_dict [dict]: dictionary with all parameters for simulation. Has to have a key named ["bite_r_Z_H"]
+        
+        Returns:
+            none
+            
+        Raises:
+            KeyError: If param_dict missed key 'bite_r_Z_H'
+            AssertionError: If check_infection_H is not used on mode H
+            
+        """
+        #get bite radius for zombie
+        try: bite_radius = param_dict["bite_r_Z_H"]
+        except KeyError: raise KeyError("param_dict is missing the required 'bite_r_Z_H' key.")
+        
+        #check if entity.mode is Human
+        assert self.mode == "H", f'Logic Error, check_infection_H is used on self.mode = {self.mode}, should be = H'
+        
+        #get the position of the alerter of the Human which is the clostest zombie
+        pos_zombie = self.pos_alerter
+        
+        #if no alert, means no zombi, means no bite possible
+        if pos_zombie is None: return 
+        
+        #get distance between human and zombie
+        distance_Z_H = self.get_distance(pos_zombie)
+        
+        #if this distance is <= than bite radius, change mode to zombie
+        if distance_Z_H <= bite_radius: self.change_mode("Z")
+        
+        return
+    #--------------------check_infection-FINISH-RAPHAEL----------------------------
     
     #---------------------HUMAN-WALK-START-DIEGO-------------------------------
 
