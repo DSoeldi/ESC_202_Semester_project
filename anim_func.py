@@ -2,16 +2,23 @@
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
-fig, ax = plt.subplots()
 
 def animate(i, entities):
+    fig, ax = plt.subplots()
     ax.clear()
     coords_list = []
     for entity in entities:
         coords_list.append(entity.pos)
-    ax.plot(coords_list)
+    # ax.plot(coords_list)
+    xs, ys = zip(*coords_list)  # Unpack x and y coordinates
+    ax.scatter(xs, ys)
 
+
+fig_anim = plt.figure()
 def run_animate(i, entities):
-    ani = FuncAnimation(fig, animate(entities), frames = 20, interval=i, repeat = False)
+
+    ani = FuncAnimation(fig_anim, animate, frames = 20, interval=i, repeat = False, fargs=(entities,))
+    return ani
+
     
 

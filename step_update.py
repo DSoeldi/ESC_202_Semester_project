@@ -1,4 +1,5 @@
 from entity_class import entity
+import numpy as np
 
 
 
@@ -17,7 +18,7 @@ def step_update(entities, root_cell, param_dict):
         if entity.mode == "Z":
             # entity.kNN()   # update the prioq in the entity with the ones that are 
                                             # sorrounding it at the moment
-            entity.zombie_walk()            # update velocity and direction of zombie walk based on 
+            entity.zombie_walk(np.array((0.,0.,)))            # update velocity and direction of zombie walk based on 
                                             # prioq
             
         elif entity.mode == "H": 
@@ -34,7 +35,7 @@ def step_update(entities, root_cell, param_dict):
         # this has to happen in its own loop because if not, the gradual updating of the location
         # will change the way the simulation runs. some humans will be updated before some zombies
         # even have the chance to move. 
-        entity.update_location(param_dict["timestep"])
+        entity.update_location()
 
         ## check if silent/dead/deceased/gone/in hell
 
