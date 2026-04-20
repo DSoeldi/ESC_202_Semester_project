@@ -18,9 +18,10 @@ def step_update(entities, root_cell, param_dict):
         if entity.mode == "Z":
             # entity.kNN()   # update the prioq in the entity with the ones that are 
                                             # sorrounding it at the moment
-            entity.zombie_walk(entities)            # update velocity and direction of zombie walk based on 
+            entity.zombie_walk(entities, param_dict)            # update velocity and direction of zombie walk based on 
                                             # prioq
-            
+        
+        
         elif entity.mode == "H": 
             entity.check_infection_H(param_dict)            # check if human is in the kill radius of zombie
                                             # needs to happen at "end of last step" so at beginning
