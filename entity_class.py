@@ -516,7 +516,7 @@ class entity:
     
     #---------------------HUMAN-WALK-START-DIEGO-------------------------------
 
-    def zombie_awareness(self, position_nearest_zombie):
+    def zombie_awareness(self):
         """
         checks direction of entity that alerted entity, updates velocity and direction 
         in opposite direction.
@@ -532,12 +532,12 @@ class entity:
         """
         
 
-        distance = self.get_distance(position_nearest_zombie)
+        distance = self.get_distance(self.pos_alerter)
         if distance == 0:
             raise ValueError("Division by zero in human_awareness_walk(): " \
             "Zombie and Human are at the EXACT same spot! Check function for more Information")
  
-        run_direction = -(position_nearest_zombie - self.pos)/distance # unit vector of direction
+        run_direction = -(self.pos_alerter - self.pos)/distance # unit vector of direction
         self.change_velocity(run_direction*self.max_speed_H)
 
 
@@ -566,48 +566,33 @@ class entity:
         avoidfactor, matchingfactor, centeringfactor = factors
 
         # average values to influence pattern
-        xpos_avg = 0
-        ypos_avg = 0
-        xvel_avg = 0
-        yvel_avg = 0
+        pos_avg = np.array((0.,0.))
+        vel_avg = np.array((0.,0.))
 
         for _,ent_idx in relevant_entities:
-            # diegos temporary notes
-            # there is a problem here with the fact that the entities in the pq are not the actual entities 
-            # but their indexes. how do i get the entity list in here??
             other = entity_list[ent_idx]
             
 
             # Separation if entity is in close range
-            close_dx = 0
-            close_dy = 0
+            close = np.array((0.,0.))
 
             if self.get_distance(other.pos)<min_distance:
-                close_dx += self.pos[0]-other.pos[0]
-                close_dy += self.pos[1]-other.pos[1]
+                close += self.pos - other.pos
             
             # add other entities position to average position
-            xpos_avg += other.pos[0]
-            ypos_avg += other.pos[1]
-            xvel_avg += other.velocity[0]
-            yvel_avg += other.velocity[1]
+            pos_avg += other.pos
+            vel_avg += other.velocity
 
         # contributions of other entities
-        xpos_avg = xpos_avg/n_humans
-        ypos_avg = ypos_avg/n_humans
-        xvel_avg = xvel_avg/n_humans
-        yvel_avg = yvel_avg/n_humans
+        pos_avg = pos_avg/n_humans
+        vel_avg = vel_avg/n_humans
 
 
         # not sure if this is correctly implemented
-        self.velocity[0] = (self.velocity[0] + 
-                            (xpos_avg-self.pos[0])*centeringfactor + # towards center of group
-                            (xvel_avg-self.velocity[0])*matchingfactor + # direction of group
-                            (close_dx*avoidfactor)) # enforcing personal space
-        self.velocity[1] = (self.velocity[1] + 
-                            (xpos_avg-self.pos[0])*centeringfactor +
-                            (xvel_avg-self.velocity[0])*matchingfactor +
-                            (close_dy*avoidfactor))
+        self.velocity = (self.velocity + 
+                            (pos_avg-self.pos)*centeringfactor +
+                            (vel_avg-self.velocity)*matchingfactor +
+                            (close*avoidfactor))
                                          
 
     def human_walk(self, entity_list):
@@ -629,20 +614,20 @@ class entity:
         if len(self.pq.heap) == 0:
             self.change_velocity(self.param_dict["max_speed_H"]*np.array((1,1))) #### fix this to some other velocity
         # check if human is alerted
-        if self.alerted: 
+        elif self.alerted: 
             self.zombie_awareness()
         else:
             self.flocking_behavior(entity_list, n_humans = 4, min_distance = 1)
 
 
-    def update_location(self, timestep):
+    def update_location(self):
         """
         function to update location of an entity based on velocity vector
 
         Args: 
             timestep[double]: Timestep used to update the location of entity
         """
-        self.pos += self.velocity * timestep
+        self.pos += self.velocity * self.param_dict["timestep"]
 
         # periodic boundaries
         if self.pos[0]>=self.param_dict["x_bounds"][1]: # check upper x bound

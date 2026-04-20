@@ -2,16 +2,22 @@
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
-fig, ax = plt.subplots()
 
-def animate(i, entities):
+# Animation function
+def animate(i, snapshots):
     ax.clear()
-    coords_list = []
-    for entity in entities:
-        coords_list.append(entity.pos)
-    ax.plot(coords_list)
-
-def run_animate(i, entities):
-    ani = FuncAnimation(fig, animate(entities), frames = 20, interval=i, repeat = False)
+    coords_list = snapshots[i]  # Get the i-th snapshot
+    xs, ys = zip(*coords_list)
+    ax.scatter(xs, ys)
+    ax.set_title(f"Step {i}")
     
+
+fig, ax = plt.subplots()
+def run_animate(snapshots):
+
+    # ani = FuncAnimation(fig_anim, animate, frames = 20, interval=i, repeat = False, fargs=(entities,))
+    # return ani
+    ani = FuncAnimation(fig, animate, frames=len(snapshots), interval=200, repeat=False, fargs=(snapshots,))
+    return ani
+
 
