@@ -18,11 +18,11 @@ def step_update(entities, root_cell, param_dict):
         if entity.mode == "Z":
             # entity.kNN()   # update the prioq in the entity with the ones that are 
                                             # sorrounding it at the moment
-            entity.zombie_walk(np.array((0.,0.,)))            # update velocity and direction of zombie walk based on 
+            entity.zombie_walk(entities)            # update velocity and direction of zombie walk based on 
                                             # prioq
             
         elif entity.mode == "H": 
-            # entity.kill_radius()            # check if human is in the kill radius of zombie
+            entity.check_infection_H(param_dict)            # check if human is in the kill radius of zombie
                                             # needs to happen at "end of last step" so at beginning
                                             # of this one is also possible. otherwise there would
                                             # have to be another for loop after the location update
