@@ -588,7 +588,7 @@ class entity:
         if len(self.pq.heap) == 0:
             self.change_velocity(self.param_dict["max_speed_H"]*np.array((1,1))) #### fix this to some other velocity
         # check if human is alerted
-        if self.alerted: 
+        elif self.alerted: 
             self.zombie_awareness()
         else:
             self.flocking_behavior(entity_list, n_humans = 4, min_distance = 1)
