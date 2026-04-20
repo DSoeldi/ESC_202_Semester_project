@@ -11,7 +11,6 @@ import numpy as np
 from copy import deepcopy
 import math
 
-
  #--------------------CLASS-ENTITY-START-ANAïS-----------------------------
 
 class entity:
@@ -218,11 +217,11 @@ class entity:
 
     def change_pos_alerter(self, new_pos_alerter):
         """
-        changes alerted attribute for entity & validates it's type
+        changes pos_alerter attribute for entity & validates it's type
         
         Args:
             self (entity)
-            new_alerted (bool)
+            new_pos_alerter (np.ndarray((x,y)))
         """
         if isinstance(new_pos_alerter, np.ndarray) or new_pos_alerter != None: self.validate_vector(new_pos_alerter) 
         self.pos_alerter = deepcopy(new_pos_alerter)
@@ -319,12 +318,12 @@ class entity:
         
     #--------------------ZOMBIE-WALK-START-RAPHAEL-----------------------------
     
-    def zombie_walk(self, position_nearest_human):
+    def zombie_walk(self, entities):
         """
         Checks the alert state and executes the appropriate walk behavior.
     
         Args:
-            position_nearest_human (np.ndarray): The (x, y) coordinates of the target human.
+            entities (list): list filled with all entities.
             
         Returns:
             None: continues by calling the function for the type of walk the zombie will do
@@ -336,13 +335,10 @@ class entity:
         #entity.direction according to the if statements down below, it does
         #not however actually DO the step!
         
-        #position_nearest_human ->this position_nearest_human should come 
-        #from knn somehow, we defind it to come from there in our document 
-        
         if self.alerted:
             #there is a humans close!
             #lets go check where the human is and adjust our velocity
-            self.human_awareness_walk(position_nearest_human)
+            self.human_awareness_walk()
             
         else: 
             #mhm no food for me (zombie) right know...
@@ -380,18 +376,28 @@ class entity:
         
         return 
     
-    def human_awareness_walk(self, position_nearest_human):
+    def human_awareness_walk(self, entities):
         """
         Adjusts the zombie's velocity to chase the nearest human with max speed.
     
         Args:
-            position_nearest_human (np.ndarray)): The (x, y) coordinates of the target human.
+            entities (list): list filled with all entities.
     
         Returns:
             None: Updates self.velocity directly.
         """
         ##INFO
         #change the zombie velocity  vector, so that i points to the closes human & with max_zombie_speed
+        
+        #get index closest human in zombi heap = [(dist2, ent_idx), ...,...,...]
+        ent_idx = self.heap[0][1]
+        
+        #get position of this nearest human by using his index
+        position_nearest_human = entities[ent_idx].pos
+        
+        #now that we finally know the alerter human for the zombie we can store it, not
+        #really necessary but if we ever want to check who the alerter was we can check for it easily
+        self.change_pos_alerter(position_nearest_human) 
 
         #get vector from position zombie pointing to position human
         zombie_to_human_vector = position_nearest_human - self.pos
@@ -412,9 +418,182 @@ class entity:
         return 
     
     #--------------------ZOMBIE-WALK-FINISH-RAPHAEL----------------------------
+    #--------------------check_infection-START-RAPHAEL-----------------------------
+    def check_infection_H(self, param_dict):
+        """
+        Checks if a Human entity is close enough to a Zombie to be bitten.
+        
+        Args: param_dict [dict]: dictionary with all parameters for simulation. Has to have a key named ["bite_r_Z_H"]
+        
+        Returns:
+            none
+            
+        Raises:
+            KeyError: If param_dict missed key 'bite_r_Z_H'
+            AssertionError: If check_infection_H is not used on mode H
+            
+        """
+        #get bite radius for zombie
+        try: bite_radius = param_dict["bite_r_Z_H"]
+        except KeyError: raise KeyError("param_dict is missing the required 'bite_r_Z_H' key.")
+        
+        #check if entity.mode is Human
+        assert self.mode == "H", f'Logic Error, check_infection_H is used on self.mode = {self.mode}, should be = H'
+        
+        #get the position of the alerter of the Human which is the clostest zombie
+        pos_zombie = self.pos_alerter
+        
+        #if no alert, means no zombi, means no bite possible
+        if pos_zombie is None: return 
+        
+        #get distance between human and zombie
+        distance_Z_H = self.get_distance(pos_zombie)
+        
+        #if this distance is <= than bite radius, change mode to zombie
+        if distance_Z_H <= bite_radius: self.change_mode("Z")
+        
+        return
+    #--------------------check_infection-FINISH-RAPHAEL----------------------------
+        
+        
+    def zombie_awareness(self, position_nearest_zombie):
+        """
+        checks direction of entity that alerted entity, updates velocity and direction 
+        in opposite direction.
+    
+        Args:
+            position_nearest_zombie [vector (?)]: coordinates of nearest zombie 
+    
+        Returns:
+            none
+        
+        Raises:
+            ValueError: If the zombie and human are at the exact same position.
+        """
+        
+    
+        distance = self.get_distance(position_nearest_zombie)
+        if distance == 0:
+            raise ValueError("Division by zero in human_awareness_walk(): " \
+            "Zombie and Human are at the EXACT same spot! Check function for more Information")
+    
+        run_direction = -(position_nearest_zombie - self.pos)/distance # unit vector of direction
+        self.change_velocity(run_direction*self.max_speed_H)
     
     
+    def flocking_behavior(self, entity_list, n_humans = 4, min_distance = 1, factors = (0.3,0.2,0.2)):
+        """
+        flocking behavior for humans when no zombies are close to them. they include the closest few 
+        humans (n_humans) in their flocking behavior. 
+        
+        Args:
+            n_humans [int]: number of relevant humans for flocking behavior, standard is 4
+            min_distance [double]: minimal distance from other humans, supposed to be in a 
+            parameters set
+            factors [tuple]: factors for flocking subcalculations. 
+                            avoidfactor, matchingfactor and centeringfactor
+        
+        Returns:
+            none
+        
+        Raises:
+            Relevant Entities needs to be at least 1 for the flocking to work
+        """
+    
+        relevant_entities = self.pq.heap[0:n_humans] # number of relevant objects that are looped over
+        if len(relevant_entities)<1:
+            raise ValueError("relevant entities is zero when it should be at least 1")
+        avoidfactor, matchingfactor, centeringfactor = factors
+    
+        # average values to influence pattern
+        xpos_avg = 0
+        ypos_avg = 0
+        xvel_avg = 0
+        yvel_avg = 0
+    
+        for _,ent_idx in relevant_entities:
+            # diegos temporary notes
+            # there is a problem here with the fact that the entities in the pq are not the actual entities 
+            # but their indexes. how do i get the entity list in here??
+            other = entity_list[ent_idx]
+            
+    
+            # Separation if entity is in close range
+            close_dx = 0
+            close_dy = 0
+    
+            if self.get_distance(other.pos)<min_distance:
+                close_dx += self.pos[0]-other.pos[0]
+                close_dy += self.pos[1]-other.pos[1]
+            
+            # add other entities position to average position
+            xpos_avg += other.pos[0]
+            ypos_avg += other.pos[1]
+            xvel_avg += other.velocity[0]
+            yvel_avg += other.velocity[1]
+    
+        # contributions of other entities
+        xpos_avg = xpos_avg/n_humans
+        ypos_avg = ypos_avg/n_humans
+        xvel_avg = xvel_avg/n_humans
+        yvel_avg = yvel_avg/n_humans
     
     
+        # not sure if this is correctly implemented
+        self.velocity[0] = (self.velocity[0] + 
+                            (xpos_avg-self.pos[0])*centeringfactor + # towards center of group
+                            (xvel_avg-self.velocity[0])*matchingfactor + # direction of group
+                            (close_dx*avoidfactor)) # enforcing personal space
+        self.velocity[1] = (self.velocity[1] + 
+                            (xpos_avg-self.pos[0])*centeringfactor +
+                            (xvel_avg-self.velocity[0])*matchingfactor +
+                            (close_dy*avoidfactor))
+                                         
     
+    def human_walk(self, entity_list):
+        """
+        defines the humans walk cycle by checking if there is a zombie in the prioq or not. 
+        If there is none, flocking behavior is activated, if a zombie is present, 
+        zombie awareness is activated. 
+        If there is none, flocking behavior is activated, if a zombie is present, 
+        zombie awareness is activated. 
+        Changes the Human direction variable in self. 
+    
+        Args: 
+            None            
+        
+        Returns:
+            none
+        """
+        # check if human is alone
+        if len(self.pq.heap) == 0:
+            self.change_velocity(self.param_dict["max_speed_H"]*np.array((1,1))) #### fix this to some other velocity
+        # check if human is alerted
+        if self.alerted: 
+            self.zombie_awareness()
+        else:
+            self.flocking_behavior(entity_list, n_humans = 4, min_distance = 1)
+    
+    
+    def update_location(self, timestep):
+        """
+        function to update location of an entity based on velocity vector
+    
+        Args: 
+            timestep[double]: Timestep used to update the location of entity
+        """
+        self.pos += self.velocity * timestep
+    
+        # periodic boundaries
+        if self.pos[0]>=self.param_dict["x_bounds"][1]: # check upper x bound
+            self.pos[0]-=self.param_dict["x_bounds"][1]
+        if self.pos[0]<=self.param_dict["x_bounds"][0]: # check lower x bound
+            self.pos[0]+=self.param_dict["x_bounds"][1]
+        if self.pos[1]>=self.param_dict["y_bounds"][1]: # check upper y bound
+            self.pos[1]-=self.param_dict["y_bounds"][1]
+        if self.pos[1]<=self.param_dict["y_bounds"][0]: # check lower y bound
+            self.pos[1]+=self.param_dict["y_bounds"][1]
+    
+        
+        
     

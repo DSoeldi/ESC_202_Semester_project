@@ -1,6 +1,7 @@
 import numpy as np
 from entity_class import entity
 from cell_class import cell
+import warnings
 
 def validate_bounds(bounds):
     """
@@ -31,11 +32,30 @@ def validate_awareness_radius(awareness_r):
     #-----------------------------
     if not isinstance(awareness_r, float): raise(ValueError)
     
+def validate_bite_r_Z_H(bite_r_Z_H):
+    """
+    Validates the bite radius (in km). 
+    Expects a non-negative float; warns if unrealistic (> 2m).
+    """
+    if not isinstance(bite_r_Z_H, float): raise TypeError(
+            f'bite_r_Z_H must be a float, got {type(bite_r_Z_H)}'
+        )
+    
+    if (bite_r_Z_H < 0): raise ValueError(
+            f'bite_r_Z_H must be non-negative, got {bite_r_Z_H}'
+            )
+    
+    #bite radius bigger than 0.002km abit unrealistic, dont do raise Warning, which will stop simulation
+    #i want to keep it running, but with a warning
+    if (bite_r_Z_H > 0.002): warnings.warn(
+            "you choose a bite radius bigger than 2 meters which can be unrealistic for this simulation"
+            )
+    return
 
 
 def create_parameter_dict(n_H, n_Z, timestep, n_steps, x_bounds, y_bounds, root_cell = None, 
                           awareness_r_H = None, awareness_r_Z = None, max_speed_H = None, max_speed_Z = None, 
-                          walking_speed_Z = None, H_contr_flocking = None, max_ents_cell = None):
+                          walking_speed_Z = None, H_contr_flocking = None, max_ents_cell = None, bite_r_Z_H = None):
     """
     function that creates the parameter dictionary
 
@@ -88,6 +108,10 @@ def create_parameter_dict(n_H, n_Z, timestep, n_steps, x_bounds, y_bounds, root_
         max_ents_cell (int):
             Maximum number of entities allowed within 1 cell. 
             If None is given, default value will be used.
+            
+        bite_r_Z_H (float) in [km]:
+            Bite Radius, for distance Zombie to Human, for which the Zombie can bite the Human.
+            If None is given, default value will be used.
         
 
     Returns:
@@ -101,6 +125,7 @@ def create_parameter_dict(n_H, n_Z, timestep, n_steps, x_bounds, y_bounds, root_
     walking_speed_Z = 4.0 if walking_speed_Z == None else walking_speed_Z
     H_contr_flocking = 4 if H_contr_flocking == None else H_contr_flocking
     max_ents_cell = 6 if max_ents_cell == None else max_ents_cell
+    bite_r_Z_H = 0.0002 if bite_r_Z_H == None else bite_r_Z_H
 
     # validate correct types were given
     if not isinstance(n_H, int): raise(TypeError)
@@ -117,6 +142,7 @@ def create_parameter_dict(n_H, n_Z, timestep, n_steps, x_bounds, y_bounds, root_
     if not isinstance(walking_speed_Z, float): raise(TypeError)
     if not isinstance(H_contr_flocking, int): raise(TypeError)
     if not isinstance(max_ents_cell, int): raise(TypeError)
+    validate_bite_r_Z_H(bite_r_Z_H)
 
     return {"n_H": n_H,                          
             "n_Z": n_Z,
@@ -130,7 +156,8 @@ def create_parameter_dict(n_H, n_Z, timestep, n_steps, x_bounds, y_bounds, root_
             "max_speed_Z": max_speed_Z,
             "walking_speed_Z": walking_speed_Z,
             "H_contr_flocking": H_contr_flocking,
-            "max_ents_cell": max_ents_cell}
+            "max_ents_cell": max_ents_cell,
+            "bite_r_Z_H": bite_r_Z_H}
 
 
 def Initialize_entities(param_dict):
