@@ -377,7 +377,7 @@ class entity:
         
     #--------------------ZOMBIE-WALK-START-RAPHAEL-----------------------------
     
-    def zombie_walk(self, entities):
+    def zombie_walk(self, entities, param_dict):
         """
         Checks the alert state and executes the appropriate walk behavior.
     
@@ -401,39 +401,45 @@ class entity:
             
         else: 
             #mhm no food for me (zombie) right know...
-            self.random_walk()
+            self.random_walk(param_dict)
         
         return
     
-    def random_walk(self):
-        """
-        Adjusts the zombie's velocity with a random walk.
-    
-        Args:
-           None
-    
-        Returns:
-            None: Updates self.velocity directly.
-        """
 
-        ##INFO
-        #redirect the velocity direction according to the random walk without
-        #changing the speed of the vector
+    def random_walk(self,param_dict):
         
+        #get the direction from last round
+        old_direction = self.get_direction()
         
-        #choose a random angle (radians) in a full circle
-        theta = rng.uniform(0, np.pi * 2)
+        #have to do this because inital velocity not init. init here!!!!!!!
+        if np.isnan(old_direction).any(): 
+            theta = rng.uniform(0, np.pi * 2)
+            old_direction = np.array([np.cos(theta), np.sin(theta)])
         
-        #new_direction has to be a unit vector
-        new_direction = np.array([np.cos(theta), np.sin(theta)])
+        #get the angle to of this direction, to x achis?
+        old_phi = math.atan2(old_direction[1], old_direction[0])
         
-        #Scale new_direction by the current speed
-        new_velocity = self.get_speed() * new_direction
+        #get the random angle
+        smoothing_param = param_dict["smooth_rand_walk"] #this has to be between 0-1, zero means he will follow a straight line
+        
+        smooth_phi = rng.uniform(-np.pi * smoothing_param, np.pi * smoothing_param)
+        
+        new_phi = old_phi + smooth_phi
+        
+        #get new direction which is depend on last direction +"slightly different angle
+        new_direction = np.array([np.cos(new_phi), np.sin(new_phi)])
+        
+        #get the walking speed
+        walking_speed_Z = param_dict["walking_speed_Z"]
+        
+        #Scale new_direction by the normal walking speed of zombie
+        new_velocity = walking_speed_Z * new_direction
         
         #update
         self.change_velocity(new_velocity)
         
         return 
+
     
     def human_awareness_walk(self, entities):
         """
