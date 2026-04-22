@@ -208,3 +208,7 @@ __marimo__/
 
 #raphael files to ignore
 cheat_sheet_raphael_priv.py
+
+# Ignore simulation outputs
+*.png
+*.gif
