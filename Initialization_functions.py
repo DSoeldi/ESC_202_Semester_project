@@ -52,10 +52,21 @@ def validate_bite_r_Z_H(bite_r_Z_H):
             )
     return
 
+def validate_smooth_rand_walk(smooth_rand_walk):
+    '''
+    Validated the param for smooth_rand_walk
+    Expects a float or int between 0.0 - 1.0
+    '''
+    if not (0.0 <= smooth_rand_walk <= 1.0):
+        raise TypeError(
+            f'smooth_rand_walk must be a between 0.0 - 1.0, got {smooth_rand_walk}'
+        )
+    return
+
 
 def create_parameter_dict(n_H, n_Z, timestep, n_steps, x_bounds, y_bounds, root_cell = None, 
                           awareness_r_H = None, awareness_r_Z = None, max_speed_H = None, max_speed_Z = None, 
-                          walking_speed_Z = None, H_contr_flocking = None, max_ents_cell = None, bite_r_Z_H = None):
+                          walking_speed_Z = None, H_contr_flocking = None, max_ents_cell = None, bite_r_Z_H = None, smooth_rand_walk = None):
     """
     function that creates the parameter dictionary
 
@@ -113,6 +124,12 @@ def create_parameter_dict(n_H, n_Z, timestep, n_steps, x_bounds, y_bounds, root_
             Bite Radius, for distance Zombie to Human, for which the Zombie can bite the Human.
             If None is given, default value will be used.
         
+        smooth_rand_walk (float/int):
+            Between 0 - 1 (straight line - random walk), smooth_rand_walk * pi (half a circle) 
+            gives a spectrum in radans an entity can randomly deviated into in the direction 
+            of its velocity to the left and to the right hemisphere.
+            
+        
 
     Returns:
         A dictionary containing all the above values
@@ -126,6 +143,7 @@ def create_parameter_dict(n_H, n_Z, timestep, n_steps, x_bounds, y_bounds, root_
     H_contr_flocking = 4 if H_contr_flocking == None else H_contr_flocking
     max_ents_cell = 6 if max_ents_cell == None else max_ents_cell
     bite_r_Z_H = 0.0002 if bite_r_Z_H == None else bite_r_Z_H
+    smooth_rand_walk = 0.2 if smooth_rand_walk == None else smooth_rand_walk
 
     # validate correct types were given
     if not isinstance(n_H, int): raise(TypeError)
@@ -143,6 +161,7 @@ def create_parameter_dict(n_H, n_Z, timestep, n_steps, x_bounds, y_bounds, root_
     if not isinstance(H_contr_flocking, int): raise(TypeError)
     if not isinstance(max_ents_cell, int): raise(TypeError)
     validate_bite_r_Z_H(bite_r_Z_H)
+    validate_smooth_rand_walk(smooth_rand_walk)
 
     return {"n_H": n_H,                          
             "n_Z": n_Z,
@@ -157,7 +176,8 @@ def create_parameter_dict(n_H, n_Z, timestep, n_steps, x_bounds, y_bounds, root_
             "walking_speed_Z": walking_speed_Z,
             "H_contr_flocking": H_contr_flocking,
             "max_ents_cell": max_ents_cell,
-            "bite_r_Z_H": bite_r_Z_H}
+            "bite_r_Z_H": bite_r_Z_H,
+            "smooth_rand_walk": smooth_rand_walk}
 
 
 def Initialize_entities(param_dict):
