@@ -420,7 +420,10 @@ class entity:
         old_phi = math.atan2(old_direction[1], old_direction[0])
         
         #get the random angle
-        smoothing_param = param_dict["smooth_rand_walk"] #this has to be between 0-1, zero means he will follow a straight line
+        #this has to be between 0-1, zero means he will follow a straight line
+        try: smoothing_param = param_dict["smooth_rand_walk"]
+        except KeyError: raise KeyError("param_dict is missing the required 'bite_r_Z_H' key.")
+        
         
         smooth_phi = rng.uniform(-np.pi * smoothing_param, np.pi * smoothing_param)
         
@@ -454,31 +457,13 @@ class entity:
         ##INFO
         #change the zombie velocity  vector, so that i points to the closes human & with max_zombie_speed
         
-        #get index closest human in zombi heap = [(dist2, ent_idx), ...,...,...]
-        ent_idx = self.heap[0][1]
-        
-        #get position of this nearest human by using his index
-        position_nearest_human = entities[ent_idx].pos
-        
-        #now that we finally know the alerter human for the zombie we can store it, not
-        #really necessary but if we ever want to check who the alerter was we can check for it easily
-        self.change_pos_alerter(position_nearest_human) 
-
-        #get vector from position zombie pointing to position human
-        zombie_to_human_vector = position_nearest_human - self.pos
-        
-        #get the distance
-        distance_zombie_to_human = self.get_distance(position_nearest_human) 
-        
-        #compare distance to really small float, so we never to a div by zero 
-        #in the line after
-        safe_distance = max(distance_zombie_to_human, math.nextafter(0, 1.0))
-
-        #get the new unit vector whichs points the zombi to the human
-        new_zombie_direction = zombie_to_human_vector / safe_distance
-        
-        #to this direction multiply the max_speed_Z to get new velocity of zombie and store it there
-        self.change_velocity(new_zombie_direction * self.max_speed_Z)
+        distance = self.get_distance(self.pos_alerter)
+        if distance == 0:
+            raise ValueError("Division by zero in human_awareness_walk(): " \
+            "Zombie and Human are at the EXACT same spot! Check function for more Information")
+ 
+        run_direction = (self.pos_alerter - self.pos)/distance # unit vector of direction
+        self.change_velocity(run_direction*self.max_speed_H)
 
         return 
     
@@ -543,7 +528,7 @@ class entity:
             raise ValueError("Division by zero in human_awareness_walk(): " \
             "Zombie and Human are at the EXACT same spot! Check function for more Information")
  
-        run_direction = -(self.pos_alerter - self.pos)/distance # unit vector of direction
+        run_direction = (self.pos_alerter - self.pos)/distance # unit vector of direction
         self.change_velocity(run_direction*self.max_speed_H)
 
 

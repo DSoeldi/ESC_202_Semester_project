@@ -8,7 +8,8 @@ from anim_func import *
 xbounds = (0.0,10.0)
 ybounds = (0.,10.)
 
-param_dict = create_parameter_dict(n_H=10, n_Z=5,timestep=.08, n_steps=100, bite_r_Z_H = 0.002, 
+param_dict = create_parameter_dict(n_H=5, n_Z=1,timestep=.08, n_steps=150, smooth_rand_walk = 0.,
+                                   walking_speed_Z = 2.,awareness_r_Z = 0.7,
                                    x_bounds=np.array(xbounds), y_bounds=np.array(ybounds))
 
 entities = Initialize_entities(param_dict)
