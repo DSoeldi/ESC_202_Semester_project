@@ -385,12 +385,11 @@ class entity:
     def zombie_walk(self, entities, param_dict):
         """
         Evaluates the alert state, direction to alerter, stores those values
-        and executes the appropriate walk behavior. If walk behaviour human awarness actived,
-        alerted state turned back to Fals
+        and executes the appropriate walk behavior. 
     
         Args:
             entities (list): list filled with all entities.
-            param_dict (dict): dict with parameters
+            param_dict (dict): param_dict [dict]: dictionary with all parameters for simulation. Has to have keys named ["awareness_r_Z"], ["walking_speed_Z"]      
             
         Returns:
             None: continues by calling the function for the type of walk the zombie will do
@@ -446,6 +445,16 @@ class entity:
     
 
     def random_walk(self,param_dict):
+        """
+        Adjusts the zombie's velocity to a smoothed random walk.
+    
+        Args:
+            param_dict [dict]: dictionary with all parameters for simulation. 
+            Has to have keys named ["smooth_rand_walk"]    
+    
+        Returns:
+            None: Updates self.change_velocity directly.
+        """
         
         #get the direction from last round
         old_direction = self.get_direction()
@@ -487,11 +496,11 @@ class entity:
         Adjusts the zombie's velocity to chase the nearest human with max speed.
     
         Args:
-            entities (list): list filled with all entities.
-            
+            param_dict [dict]: dictionary with all parameters for simulation. Has to have a key named ["max_speed_H"]
+            new_zombie_direction (np.ndarray((x,y))): direction to nearest Zombi            
     
         Returns:
-            None: Updates self.velocity directly.
+            None: Updates self.change_velocity directly.
         """
         ##INFO
         #change the zombie velocity  vector, so that i points to the closes human & with max_zombie_speed
@@ -507,7 +516,8 @@ class entity:
         """
         Checks if a Human entity was alerted, if its close enough to a Zombie to be bitten, it will change its mode to a zombie.
         
-        Args: param_dict [dict]: dictionary with all parameters for simulation. Has to have a key named ["bite_r_Z_H"]
+        Args: 
+            param_dict [dict]: dictionary with all parameters for simulation. Has to have a key named ["bite_r_Z_H"]
         
         Returns:
             none
@@ -640,8 +650,10 @@ class entity:
         Returns:
             none
         """
-        #-----raphi-provisorisch--------------------------
+        #-----raphi-provisorisch-----------------------------
         #human pq has humans and zombies?? search for nearest zombie...
+        #filter for nearest zombi, for diego: just wrote this to see if they interact better then, still needs to be written
+        #effiently
         #------------calcs if Human is ALERTED------------
         nearest_zombi = 0
         heap = self.pq.heap
@@ -678,7 +690,8 @@ class entity:
                 new_human_direction = - human_to_zombi_vector / safe_distance
             else: self.change_alerted(False)
                 
-        #-----raphi done ---------------------------
+        #-----raphi provisorisch done -------------------------------
+        
         # check if human is alone
         if len(self.pq.heap) == 0:
             self.change_velocity(self.param_dict["max_speed_H"]*np.array((1,1))) #### fix this to some other velocity
