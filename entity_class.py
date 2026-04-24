@@ -137,7 +137,7 @@ class entity:
         self.idx_all_ents = idx_all_ents
         self.velocity = velocity
         self.alerted = alerted
-        self.pos_alerter = pos_alerter 
+        self.pos_alerter = pos_alerter
         self.pq = prio_q()
         self.preferred_dir = None
         
@@ -551,7 +551,9 @@ class entity:
             "Zombie and Human are at the EXACT same spot! Check function for more Information")
  
         run_direction = -(self.pos_alerter - self.pos)/distance # unit vector of direction
-        self.change_velocity(run_direction*self.max_speed_H)
+        print("zombie awareness walk!")
+        print(self.param_dict["max_speed_H"])
+        self.change_velocity(run_direction*self.param_dict["max_speed_H"])
 
 
     def flocking_behavior(self, entity_list, n_humans = 4, min_distance = 1, factors = (0.3,0.2,0.2)):
@@ -637,10 +639,9 @@ class entity:
                 nearest_zombie = entity_list[idx]
                 break
         if  nearest_zombie != 0:
-            
             awareness_r = self.param_dict["awareness_r_H"]
         
-            #get position of this nearest zombi 
+            #get position of this nearest zombie
             position_nearest_zombie = nearest_zombie.pos
         
             #get the distance
@@ -648,11 +649,11 @@ class entity:
         
             #compare distance to really small float, so we never to a div by zero 
             #in the line after
-            safe_distance = max(distance_zombie_to_human, math.nextafter(0, 1.0))
+            distance = max(distance_zombie_to_human, math.nextafter(0, 1.0))
         
-            if safe_distance <= awareness_r:
-
-                self.change_alerted(True)
+            if distance <= awareness_r:
+                print("zombie too close!")
+                self.change_alerted(new_alerted=True)
             
                 #update position of alerter
                 self.change_pos_alerter(position_nearest_zombie) 
@@ -661,7 +662,7 @@ class entity:
                 human_to_zombie_vector = position_nearest_zombie - self.pos
             
                 #get the new unit vector whichs points the zombi to the human
-                new_human_direction = - human_to_zombie_vector / safe_distance
+                new_human_direction = - human_to_zombie_vector / distance
             else: self.change_alerted(False)
                 
         #-----raphi provisorisch done -------------------------------
