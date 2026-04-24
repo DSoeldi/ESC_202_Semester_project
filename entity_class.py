@@ -623,6 +623,49 @@ class entity:
         Returns:
             none
         """
+
+        #-----raphi-provisorisch-----------------------------
+        #human pq has humans and zombies?? search for nearest zombie...
+        #filter for nearest zombie, for diego: just wrote this to see if they interact better then, still needs to be written
+        #effiently
+        #------------calcs if Human is ALERTED------------
+        nearest_zombie = 0
+        heap = self.pq.heap
+        for i in range(len(heap)):
+            idx = heap[i][1]
+            if entity_list[idx].mode == "Z": 
+                nearest_zombie = entity_list[idx]
+                break
+        if  nearest_zombie != 0:
+            
+            awareness_r = self.param_dict["awareness_r_H"]
+        
+            #get position of this nearest zombi 
+            position_nearest_zombie = nearest_zombie.pos
+        
+            #get the distance
+            distance_zombie_to_human = self.get_distance(position_nearest_zombie) 
+        
+            #compare distance to really small float, so we never to a div by zero 
+            #in the line after
+            safe_distance = max(distance_zombie_to_human, math.nextafter(0, 1.0))
+        
+            if safe_distance <= awareness_r:
+
+                self.change_alerted(True)
+            
+                #update position of alerter
+                self.change_pos_alerter(position_nearest_zombie) 
+            
+                #get vector from position zombie pointing to position human
+                human_to_zombie_vector = position_nearest_zombie - self.pos
+            
+                #get the new unit vector whichs points the zombi to the human
+                new_human_direction = - human_to_zombie_vector / safe_distance
+            else: self.change_alerted(False)
+                
+        #-----raphi provisorisch done -------------------------------
+
         # check if human is alone
         if len(self.pq.heap) == 0:
             self.lonely_walk()
