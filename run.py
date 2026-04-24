@@ -5,11 +5,15 @@ import numpy as np
 from step_update import *
 from anim_func import *
 
-xbounds = (0.0,10.0)
-ybounds = (0.,10.)
+xbounds = (0.0,20.0)
+ybounds = (0.,20.)
 
-param_dict = create_parameter_dict(n_H=5, n_Z=1,timestep=.08, n_steps=150, smooth_rand_walk = 0.,
-                                   walking_speed_Z = 2.,awareness_r_Z = 0.7,
+param_dict = create_parameter_dict(n_H=30, n_Z=30,timestep=.08, n_steps=150, 
+                                   smooth_rand_walk = 0.5,
+                                   bite_r_Z_H = 0.2,
+                                   walking_speed_Z = 3.,
+                                   max_speed_Z = 15., max_speed_H = 5.,
+                                   awareness_r_Z = 0.9,awareness_r_H = 0.9,
                                    x_bounds=np.array(xbounds), y_bounds=np.array(ybounds))
 
 entities = Initialize_entities(param_dict)
@@ -25,12 +29,12 @@ snapshots = []
 for step in range(0,param_dict["n_steps"]):
     step_update(entities, root_cell, param_dict)
     print(step)
-    snapshots.append([entity.pos.copy() for entity in entities])  # Store a copy of 
+    snapshots.append([(entity.pos.copy(), entity.mode) for entity in entities])  # Store a copy of 
 
 plt.figure()
 plot_entities(entities)
 plt.savefig("end.png")
 plt.close()
 
-ani = run_animate(snapshots, param_dict, entities)
+ani = run_animate(snapshots, param_dict)
 ani.save("testanimation.gif")

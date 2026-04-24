@@ -10,7 +10,7 @@ from priority_queue_class import prio_q
 import numpy as np
 from copy import deepcopy
 import math
-
+import warnings
  #--------------------CLASS-ENTITY-START-ANAïS-----------------------------
 
  
@@ -89,7 +89,7 @@ class entity:
 
 
     def __init__(self, mode, pos, param_dict, idx_all_ents, velocity = np.array((0.0,0.0)), 
-                 alerted = False, pos_alerter = None):
+                 alerted = False, pos_alerter = None, infected = False):
         """
         Initializes a simulation entity (Human or Zombie).
         
@@ -205,12 +205,15 @@ class entity:
             # isch die Funktion nötig ????
         #-----------------------------
         """
-        calculates direction (unit vector) from velocity vector
+        calculates direction (unit vector) from velocity vector. 
         
         Returns:
             direction (np.array((x,y)))
         """
+        #since velocity is not initalizes get_speed can return 0, which mean we get an invalid number here!!!!!!
+        #which can cause entities to not get a position in step_update, menaing they dont appear
         return self.velocity / self.get_speed()
+
     
     def get_distance(self, coords):
         """
@@ -361,7 +364,9 @@ class entity:
                     d = self.calculate_dist2_entity(curr_ent, offset)
                     if d <= (1000 * self.param_dict["awareness_r_H"])**2:
                         self.pq.push((d, p))
-                    if curr_ent.mode == "Z" and d<= (1000 * self.param_dict["awareness_r_Z"])**2: # if the entity were looking at is a zombie, it gets the distance and the index of the human in its pq
+                    
+                    # if the entity were looking at is a zombie, it gets the distance and the index of the human in its pq
+                    if curr_ent.mode == "Z" and d<= (1000 * self.param_dict["awareness_r_Z"])**2:
                         curr_ent.pq.push((d,self.idx_all_ents))
 
 
@@ -379,29 +384,63 @@ class entity:
     
     def zombie_walk(self, entities, param_dict):
         """
-        Checks the alert state and executes the appropriate walk behavior.
+        Evaluates the alert state, direction to alerter, stores those values
+        and executes the appropriate walk behavior. If walk behaviour human awarness actived,
+        alerted state turned back to Fals
     
         Args:
             entities (list): list filled with all entities.
+            param_dict (dict): dict with parameters
             
         Returns:
             None: continues by calling the function for the type of walk the zombie will do
             
         """
+    
+        #------------calcs if zombie is ALERTED------------
+        #---
+        #problem if human on pos 1 is now zombie his pq is empty this raises error here list index out of range
         
-        #INFO
-        #this function calls functions that change the entity.velocity & 
-        #entity.direction according to the if statements down below, it does
-        #not however actually DO the step!
+        #---
+        ent_idx = self.pq.heap[0][1]
+        awareness_r = param_dict["awareness_r_Z"]
         
+        #get position of this nearest human by using his index
+        position_nearest_human = entities[ent_idx].pos
+        
+        #get the distance
+        distance_zombie_to_human = self.get_distance(position_nearest_human) 
+        
+        #compare distance to really small float, so we never to a div by zero 
+        #in the line after
+        safe_distance = max(distance_zombie_to_human, math.nextafter(0, 1.0))
+        
+        if safe_distance <= awareness_r:
+
+            self.change_alerted(True)
+            
+            #update position of alerter
+            self.change_pos_alerter(position_nearest_human) 
+            
+            #get vector from position zombie pointing to position human
+            zombie_to_human_vector = position_nearest_human - self.pos
+            
+            #get the new unit vector whichs points the zombi to the human
+            new_zombie_direction = zombie_to_human_vector / safe_distance
+            
+        else: self.change_alerted(False)
+            
+    
+        #---------------------executes walk type-------------
         if self.alerted:
             #there is a humans close!
             #lets go check where the human is and adjust our velocity
-            self.human_awareness_walk(entities)
-            
+            self.human_awareness_walk(new_zombie_direction, param_dict)
+
         else: 
             #mhm no food for me (zombie) right know...
             self.random_walk(param_dict)
+        #--------------------------------------------------
         
         return
     
@@ -411,20 +450,19 @@ class entity:
         #get the direction from last round
         old_direction = self.get_direction()
         
-        #have to do this because inital velocity not init. init here!!!!!!!
+        #if old direction is na
         if np.isnan(old_direction).any(): 
             theta = rng.uniform(0, np.pi * 2)
             old_direction = np.array([np.cos(theta), np.sin(theta)])
+            warnings.warn(f'invalid value encountered in self.get_direction, initialized a rand. direction: {old_direction}')
         
         #get the angle to of this direction, to x achis?
         old_phi = math.atan2(old_direction[1], old_direction[0])
         
         #get the random angle
         #this has to be between 0-1, zero means he will follow a straight line
-        try: smoothing_param = param_dict["smooth_rand_walk"]
-        except KeyError: raise KeyError("param_dict is missing the required 'bite_r_Z_H' key.")
-        
-        
+        smoothing_param = param_dict["smooth_rand_walk"]
+
         smooth_phi = rng.uniform(-np.pi * smoothing_param, np.pi * smoothing_param)
         
         new_phi = old_phi + smooth_phi
@@ -444,12 +482,13 @@ class entity:
         return 
 
     
-    def human_awareness_walk(self, entities):
+    def human_awareness_walk(self, new_zombie_direction, param_dict):
         """
         Adjusts the zombie's velocity to chase the nearest human with max speed.
     
         Args:
             entities (list): list filled with all entities.
+            
     
         Returns:
             None: Updates self.velocity directly.
@@ -457,21 +496,16 @@ class entity:
         ##INFO
         #change the zombie velocity  vector, so that i points to the closes human & with max_zombie_speed
         
-        distance = self.get_distance(self.pos_alerter)
-        if distance == 0:
-            raise ValueError("Division by zero in human_awareness_walk(): " \
-            "Zombie and Human are at the EXACT same spot! Check function for more Information")
- 
-        run_direction = (self.pos_alerter - self.pos)/distance # unit vector of direction
-        self.change_velocity(run_direction*self.max_speed_H)
-
+        #to this direction multiply the max_speed_Z to get new velocity of zombie and store it there
+        self.change_velocity(new_zombie_direction * param_dict["max_speed_H"])
+        
         return 
     
     #--------------------ZOMBIE-WALK-FINISH-RAPHAEL----------------------------
     #--------------------check_infection-START-RAPHAEL-----------------------------
     def check_infection_H(self, param_dict):
         """
-        Checks if a Human entity is close enough to a Zombie to be bitten.
+        Checks if a Human entity was alerted, if its close enough to a Zombie to be bitten, it will change its mode to a zombie.
         
         Args: param_dict [dict]: dictionary with all parameters for simulation. Has to have a key named ["bite_r_Z_H"]
         
@@ -483,25 +517,30 @@ class entity:
             AssertionError: If check_infection_H is not used on mode H
             
         """
-        #get bite radius for zombie
-        try: bite_radius = param_dict["bite_r_Z_H"]
-        except KeyError: raise KeyError("param_dict is missing the required 'bite_r_Z_H' key.")
-        
         #check if entity.mode is Human
         assert self.mode == "H", f'Logic Error, check_infection_H is used on self.mode = {self.mode}, should be = H'
         
-        #get the position of the alerter of the Human which is the clostest zombie
-        pos_zombie = self.pos_alerter
+        #get bite radius for zombie
+        bite_r = param_dict["bite_r_Z_H"]
+    
+        #get position alerter
+        pos_alerter = self.pos_alerter
         
-        #if no alert, means no zombi, means no bite possible
-        if pos_zombie is None: return 
+        distance = self.get_distance(pos_alerter) 
         
-        #get distance between human and zombie
-        distance_Z_H = self.get_distance(pos_zombie)
+        #compare distance to really small float, so we never to a div by zero 
+        #in the line after
+        safe_distance = max(distance, math.nextafter(0, 1.0))
         
-        #if this distance is <= than bite radius, change mode to zombie
-        if distance_Z_H <= bite_radius: self.change_mode("Z")
+        if safe_distance <= bite_r:
+
+            print("infection happend")
+            self.change_mode("Z")
+            print("Human turned to Zombie")
+            
+
         
+
         return
     #--------------------check_infection-FINISH-RAPHAEL----------------------------
     
@@ -586,13 +625,13 @@ class entity:
                             (close*avoidfactor))
                                          
 
-    def human_walk(self, entity_list):
+    def human_walk(self, entity_list, param_dict):
         """
         defines the humans walk cycle by checking if there is a zombie in the prioq or not. 
         If there is none, flocking behavior is activated, if a zombie is present, 
         zombie awareness is activated. 
         If there is none, flocking behavior is activated, if a zombie is present, 
-        zombie awareness is activated. 
+        zombie awareness is activated & alerted state turned True for Human.
         Changes the Human direction variable in self. 
 
         Args: 
@@ -601,12 +640,53 @@ class entity:
         Returns:
             none
         """
+        #-----raphi-provisorisch--------------------------
+        #human pq has humans and zombies?? search for nearest zombie...
+        #------------calcs if Human is ALERTED------------
+        nearest_zombi = 0
+        heap = self.pq.heap
+        for i in range(len(heap)):
+            idx = heap[i][1]
+            if entity_list[idx].mode == "Z": 
+                nearest_zombi = entity_list[idx]
+                break
+        if  nearest_zombi != 0:
+            
+            awareness_r = param_dict["awareness_r_H"]
+        
+            #get position of this nearest zombi 
+            position_nearest_zombi = nearest_zombi.pos
+        
+            #get the distance
+            distance_zombie_to_human = self.get_distance(position_nearest_zombi) 
+        
+            #compare distance to really small float, so we never to a div by zero 
+            #in the line after
+            safe_distance = max(distance_zombie_to_human, math.nextafter(0, 1.0))
+        
+            if safe_distance <= awareness_r:
+
+                self.change_alerted(True)
+            
+                #update position of alerter
+                self.change_pos_alerter(position_nearest_zombi) 
+            
+                #get vector from position zombie pointing to position human
+                human_to_zombi_vector = position_nearest_zombi - self.pos
+            
+                #get the new unit vector whichs points the zombi to the human
+                new_human_direction = - human_to_zombi_vector / safe_distance
+            else: self.change_alerted(False)
+                
+        #-----raphi done ---------------------------
         # check if human is alone
         if len(self.pq.heap) == 0:
             self.change_velocity(self.param_dict["max_speed_H"]*np.array((1,1))) #### fix this to some other velocity
         # check if human is alerted
         elif self.alerted: 
-            self.zombie_awareness()
+            #self.zombie_awareness()
+            max_speed_H = param_dict["max_speed_H"]
+            self.change_velocity(new_human_direction*max_speed_H)
         else:
             self.flocking_behavior(entity_list, n_humans = 4, min_distance = 1)
 
