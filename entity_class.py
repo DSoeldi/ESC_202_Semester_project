@@ -128,6 +128,8 @@ class entity:
         Additional Attrb:
             pq (prio_q):
                 Priority queue attribute for entity
+            preferred_dir (np.array):
+                Preferred direction that a human walks in, gets set first time they are alone (empty pq)
         """
         self.mode = mode
         self.pos = pos
@@ -137,6 +139,7 @@ class entity:
         self.alerted = alerted
         self.pos_alerter = pos_alerter 
         self.pq = prio_q()
+        self.preferred_dir = None
         
         # Raise Type/Value Error for wrong input
         self.validate_mode(self.mode)
@@ -190,6 +193,10 @@ class entity:
                 (self.pq == other.pq)
                 )
     
+    def set_preferred_dir(self):
+        print("setting preferred direction")
+        angle = np.random.uniform(0, 2 * np.pi)
+        self.preferred_dir = np.array([np.cos(angle), np.sin(angle)])
 
     def get_speed(self):
         """
@@ -618,12 +625,23 @@ class entity:
         """
         # check if human is alone
         if len(self.pq.heap) == 0:
-            self.change_velocity(self.param_dict["max_speed_H"]*np.array((1,1))) #### fix this to some other velocity
+            self.lonely_walk()
         # check if human is alerted
         elif self.alerted: 
             self.zombie_awareness()
         else:
             self.flocking_behavior(entity_list, n_humans = 4, min_distance = 1)
+    
+    def lonely_walk(self):
+        """
+        Sets a random distance that is that humans preferred direction to walk in when they are alone. 
+        This is done by calling random uniform for x and y
+        """
+        if self.preferred_dir is None:
+            self.set_preferred_dir()
+
+        self.change_velocity(self.param_dict["max_speed_H"] * self.preferred_dir)
+
 
 
     def update_location(self):
