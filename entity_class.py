@@ -700,11 +700,11 @@ class entity:
         # periodic boundaries
         if self.pos[0]>=self.param_dict["x_bounds"][1]: # check upper x bound
             self.pos[0]-=self.param_dict["x_bounds"][1]
-        if self.pos[0]<=self.param_dict["x_bounds"][0]: # check lower x bound
+        if self.pos[0]<self.param_dict["x_bounds"][0]: # check lower x bound
             self.pos[0]+=self.param_dict["x_bounds"][1]
         if self.pos[1]>=self.param_dict["y_bounds"][1]: # check upper y bound
             self.pos[1]-=self.param_dict["y_bounds"][1]
-        if self.pos[1]<=self.param_dict["y_bounds"][0]: # check lower y bound
+        if self.pos[1]<self.param_dict["y_bounds"][0]: # check lower y bound
             self.pos[1]+=self.param_dict["y_bounds"][1]
 
         
