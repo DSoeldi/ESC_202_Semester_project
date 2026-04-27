@@ -195,7 +195,7 @@ def Initialize_entities(param_dict):
                                        np.random.uniform(param_dict["y_bounds"][0], param_dict["y_bounds"][1]))),
                                        param_dict,
                                        i) 
-            for i in range(param_dict["n_Z"])])
+            for i in range(param_dict["n_H"], param_dict["n_H"] +param_dict["n_Z"])])
     
     return ents
 
