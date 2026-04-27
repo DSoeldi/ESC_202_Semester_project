@@ -39,7 +39,7 @@ def step_update(entities, root_cell, param_dict):
         
     for entity in entities:
         if entity.mode == "H" and entity.alerted is True: 
-            entity.check_infection_H(param_dict)            # check if human is in the kill radius of zombie
+            entity.check_infection_H(param_dict["bite_r_Z_H"])            # check if human is in the kill radius of zombie
         # this has to happen in its own loop because if not, the gradual updating of the location
         # will change the way the simulation runs. some humans will be updated before some zombies
         # even have the chance to move. 
