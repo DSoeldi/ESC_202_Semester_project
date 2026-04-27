@@ -8,7 +8,7 @@ from anim_func import *
 xbounds = (0.0,100.0)
 ybounds = (0.,100.)
 
-param_dict = create_parameter_dict(n_H=100, n_Z=10,timestep=.08, n_steps=150, 
+param_dict = create_parameter_dict(n_H=100, n_Z=10,timestep=.08, n_steps=15, 
                                    smooth_rand_walk = 0.3,
                                    bite_r_Z_H = 0.2,
                                    walking_speed_Z = 3.,
