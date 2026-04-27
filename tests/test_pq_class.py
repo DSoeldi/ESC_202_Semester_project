@@ -1,7 +1,7 @@
 import unittest 
 
 from heapq import *
-from priority_queue_class import prio_q
+from classes.priority_queue_class import prio_q
 
 class pq_test(unittest.TestCase):
     

@@ -1,6 +1,6 @@
-from cell_class import cell
+from classes.cell_class import cell
 from globals import entities, parameter_dict
-from entity_class import entity
+from classes.entity_class import entity
 import random as rd
 import numpy as np
 import matplotlib.pyplot as plt

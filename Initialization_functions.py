@@ -1,6 +1,6 @@
 import numpy as np
-from entity_class import entity
-from cell_class import cell
+from classes.entity_class import entity
+from classes.cell_class import cell
 import warnings
 
 def validate_bounds(bounds):

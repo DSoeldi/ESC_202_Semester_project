@@ -1,7 +1,7 @@
 import unittest 
-from entity_class import entity
+from classese.ntity_class import entity
 import numpy as np
-from priority_queue_class import prio_q
+from classes.priority_queue_class import prio_q
 from unittest.mock import MagicMock
 import pytest
 
