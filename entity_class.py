@@ -318,7 +318,6 @@ class entity:
         Args: 
             self (entity with mode == "H)
         """
-        if self.mode != "H": raise Warning("kNN was initiated for a Zombie!!!")
         self.change_pq(prio_q()) # initiate a new pq for the next step, otherwise it will grow with each step 
         self.kNN_loop_periodic_bounds() 
 
@@ -362,12 +361,14 @@ class entity:
                 if p != self.idx_all_ents: # compare indeces of both entities, to make sure we don't compare an entity with itself
                     curr_ent = curr_cell.all_ents[p]
                     d = self.calculate_dist2_entity(curr_ent, offset)
-                    if d <= (1000 * self.param_dict["awareness_r_H"])**2:
+                    if self.mode == "Z":
+                        awareness = self.param_dict["awareness_r_Z"]
+                        
+                    elif self.mode == "H": 
+                        awareness = self.param_dict["awareness_r_H"]
+                        
+                    if d <= (awareness)**2:
                         self.pq.push((d, p))
-                    
-                    # if the entity were looking at is a zombie, it gets the distance and the index of the human in its pq
-                    if curr_ent.mode == "Z" and d<= (1000 * self.param_dict["awareness_r_Z"])**2:
-                        curr_ent.pq.push((d,self.idx_all_ents))
 
 
         else:
@@ -375,9 +376,9 @@ class entity:
             dist2_c2 = curr_cell.d_cells[1].calc_dist2_cell_entity(self, offset)
 
              # check if distance to daughter cell is (partially) within the awareness radius, if so do recursive call for daughter cell
-            if dist2_c1 <= (1000 * self.param_dict["awareness_r_H"])**2:
+            if dist2_c1 <= (self.param_dict["awareness_r_H"])**2:
                 self.neighbor_search(curr_cell.d_cells[0], offset)
-            if dist2_c2 <= (1000 * self.param_dict["awareness_r_H"])**2:
+            if dist2_c2 <= (self.param_dict["awareness_r_H"])**2:
                 self.neighbor_search(curr_cell.d_cells[1], offset)
         
     #--------------------ZOMBIE-WALK-START-RAPHAEL-----------------------------
@@ -445,7 +446,6 @@ class entity:
         Returns:
             None: Updates self.change_velocity directly.
         """
-        
         #get the direction from last round
         old_direction = self.get_direction()
         
@@ -494,23 +494,31 @@ class entity:
         Returns:
             None: Updates self.change_alerted and self change_pos_alerter directly.
         """
-        
-        #------------calcs if other entity withing range------------
-        ent_idx = self.pq.heap[0][1]
-        
-        #get position of this nearest entity by using his index
-        pos_nearest_entity = entities[ent_idx].pos
-        
-        #get the distance
-        distance_between_entities = self.get_distance(pos_nearest_entity) 
-
-
-        if distance_between_entities <= awareness_r:
-
-            self.change_alerted(True)
+        #---test---
+        nearest_human = 0
+        heap = self.pq.heap
+        for i in range(len(heap)):
+            idx = heap[i][1]
+            if entities[idx].mode == "H": 
+                nearest_human = entities[idx]
+                break
+        if  nearest_human != 0:
+            #------------calcs if other entity withing range------------
+            #ent_idx = self.pq.heap[0][1]
             
-            #update position of alerter
-            self.change_pos_alerter(pos_nearest_entity) 
+            #get position of this nearest entity by using his index
+            pos_nearest_entity = nearest_human.pos #entities[ent_idx].pos
+            
+            #get the distance
+            distance_between_entities = self.get_distance(pos_nearest_entity) 
+    
+    
+            if distance_between_entities <= awareness_r:
+    
+                self.change_alerted(True)
+                
+                #update position of alerter
+                self.change_pos_alerter(pos_nearest_entity) 
             
 
             

@@ -5,14 +5,14 @@ import numpy as np
 from step_update import *
 from anim_func import *
 
-xbounds = (0.0,20.0)
-ybounds = (0.,20.)
+xbounds = (0.0,100.0)
+ybounds = (0.,100.)
 
-param_dict = create_parameter_dict(n_H=5, n_Z=5,timestep=.08, n_steps=50, 
-                                   smooth_rand_walk = 0.5,
+param_dict = create_parameter_dict(n_H=100, n_Z=10,timestep=.08, n_steps=150, 
+                                   smooth_rand_walk = 0.3,
                                    bite_r_Z_H = 0.2,
                                    walking_speed_Z = 3.,
-                                   max_speed_Z = 15., max_speed_H = 5.,
+                                   max_speed_Z = 15., max_speed_H = 10.,
                                    awareness_r_Z = 0.9,awareness_r_H = 0.9,
                                    x_bounds=np.array(xbounds), y_bounds=np.array(ybounds))
 
