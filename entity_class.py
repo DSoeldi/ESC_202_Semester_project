@@ -128,6 +128,8 @@ class entity:
         Additional Attrb:
             pq (prio_q):
                 Priority queue attribute for entity
+            preferred_dir (np.array):
+                Preferred direction that a human walks in, gets set first time they are alone (empty pq)
         """
         self.mode = mode
         self.pos = pos
@@ -135,8 +137,9 @@ class entity:
         self.idx_all_ents = idx_all_ents
         self.velocity = velocity
         self.alerted = alerted
-        self.pos_alerter = pos_alerter 
+        self.pos_alerter = pos_alerter
         self.pq = prio_q()
+        self.preferred_dir = None
         
         # Raise Type/Value Error for wrong input
         self.validate_mode(self.mode)
@@ -190,6 +193,10 @@ class entity:
                 (self.pq == other.pq)
                 )
     
+    def set_preferred_dir(self):
+        print("setting preferred direction")
+        angle = np.random.uniform(0, 2 * np.pi)
+        self.preferred_dir = np.array([np.cos(angle), np.sin(angle)])
 
     def get_speed(self):
         """
@@ -586,8 +593,10 @@ class entity:
             raise ValueError("Division by zero in human_awareness_walk(): " \
             "Zombie and Human are at the EXACT same spot! Check function for more Information")
  
-        run_direction = (self.pos_alerter - self.pos)/distance # unit vector of direction
-        self.change_velocity(run_direction*self.max_speed_H)
+        run_direction = -(self.pos_alerter - self.pos)/distance # unit vector of direction
+        print("zombie awareness walk!")
+        print(self.param_dict["max_speed_H"])
+        self.change_velocity(run_direction*self.param_dict["max_speed_H"])
 
 
     def flocking_behavior(self, entity_list, n_humans = 4, min_distance = 1, factors = (0.3,0.2,0.2)):
@@ -659,51 +668,51 @@ class entity:
         Returns:
             none
         """
+
         #-----raphi-provisorisch-----------------------------
         #human pq has humans and zombies?? search for nearest zombie...
-        #filter for nearest zombi, for diego: just wrote this to see if they interact better then, still needs to be written
+        #filter for nearest zombie, for diego: just wrote this to see if they interact better then, still needs to be written
         #effiently
         #------------calcs if Human is ALERTED------------
-        nearest_zombi = 0
+        nearest_zombie = 0
         heap = self.pq.heap
         for i in range(len(heap)):
             idx = heap[i][1]
             if entity_list[idx].mode == "Z": 
-                nearest_zombi = entity_list[idx]
+                nearest_zombie = entity_list[idx]
                 break
-        if  nearest_zombi != 0:
-            
-            awareness_r = param_dict["awareness_r_H"]
+        if  nearest_zombie != 0:
+            awareness_r = self.param_dict["awareness_r_H"]
         
-            #get position of this nearest zombi 
-            position_nearest_zombi = nearest_zombi.pos
+            #get position of this nearest zombie
+            position_nearest_zombie = nearest_zombie.pos
         
             #get the distance
-            distance_zombie_to_human = self.get_distance(position_nearest_zombi) 
+            distance_zombie_to_human = self.get_distance(position_nearest_zombie) 
         
             #compare distance to really small float, so we never to a div by zero 
             #in the line after
-            safe_distance = max(distance_zombie_to_human, math.nextafter(0, 1.0))
+            distance = max(distance_zombie_to_human, math.nextafter(0, 1.0))
         
-            if safe_distance <= awareness_r:
-
-                self.change_alerted(True)
+            if distance <= awareness_r:
+                print("zombie too close!")
+                self.change_alerted(new_alerted=True)
             
                 #update position of alerter
-                self.change_pos_alerter(position_nearest_zombi) 
+                self.change_pos_alerter(position_nearest_zombie) 
             
                 #get vector from position zombie pointing to position human
-                human_to_zombi_vector = position_nearest_zombi - self.pos
+                human_to_zombie_vector = position_nearest_zombie - self.pos
             
                 #get the new unit vector whichs points the zombi to the human
-                new_human_direction = - human_to_zombi_vector / safe_distance
+                new_human_direction = - human_to_zombie_vector / distance
             else: self.change_alerted(False)
                 
         #-----raphi provisorisch done -------------------------------
-        
+
         # check if human is alone
         if len(self.pq.heap) == 0:
-            self.change_velocity(self.param_dict["max_speed_H"]*np.array((1,1))) #### fix this to some other velocity
+            self.lonely_walk()
         # check if human is alerted
         elif self.alerted: 
             #self.zombie_awareness()
@@ -711,6 +720,17 @@ class entity:
             self.change_velocity(new_human_direction*max_speed_H)
         else:
             self.flocking_behavior(entity_list, n_humans = 4, min_distance = 1)
+    
+    def lonely_walk(self):
+        """
+        Sets a random distance that is that humans preferred direction to walk in when they are alone. 
+        This is done by calling random uniform for x and y
+        """
+        if self.preferred_dir is None:
+            self.set_preferred_dir()
+
+        self.change_velocity(self.param_dict["max_speed_H"] * self.preferred_dir)
+
 
 
     def update_location(self):
@@ -725,11 +745,11 @@ class entity:
         # periodic boundaries
         if self.pos[0]>=self.param_dict["x_bounds"][1]: # check upper x bound
             self.pos[0]-=self.param_dict["x_bounds"][1]
-        if self.pos[0]<=self.param_dict["x_bounds"][0]: # check lower x bound
+        if self.pos[0]<self.param_dict["x_bounds"][0]: # check lower x bound
             self.pos[0]+=self.param_dict["x_bounds"][1]
         if self.pos[1]>=self.param_dict["y_bounds"][1]: # check upper y bound
             self.pos[1]-=self.param_dict["y_bounds"][1]
-        if self.pos[1]<=self.param_dict["y_bounds"][0]: # check lower y bound
+        if self.pos[1]<self.param_dict["y_bounds"][0]: # check lower y bound
             self.pos[1]+=self.param_dict["y_bounds"][1]
 
         
