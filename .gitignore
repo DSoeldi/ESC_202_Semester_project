@@ -211,4 +211,6 @@ cheat_sheet_raphael_priv.py
 
 # Ignore simulation outputs
 *.png
+**.png
 *.gif
+**.gif
