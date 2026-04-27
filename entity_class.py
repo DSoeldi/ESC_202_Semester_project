@@ -137,7 +137,7 @@ class entity:
         self.idx_all_ents = idx_all_ents
         self.velocity = velocity
         self.alerted = alerted
-        self.pos_alerter = pos_alerter 
+        self.pos_alerter = pos_alerter
         self.pq = prio_q()
         self.preferred_dir = None
         
@@ -551,7 +551,9 @@ class entity:
             "Zombie and Human are at the EXACT same spot! Check function for more Information")
  
         run_direction = -(self.pos_alerter - self.pos)/distance # unit vector of direction
-        self.change_velocity(run_direction*self.max_speed_H)
+        print("zombie awareness walk!")
+        print(self.param_dict["max_speed_H"])
+        self.change_velocity(run_direction*self.param_dict["max_speed_H"])
 
 
     def flocking_behavior(self, entity_list, n_humans = 4, min_distance = 1, factors = (0.3,0.2,0.2)):
@@ -623,6 +625,48 @@ class entity:
         Returns:
             none
         """
+
+        #-----raphi-provisorisch-----------------------------
+        #human pq has humans and zombies?? search for nearest zombie...
+        #filter for nearest zombie, for diego: just wrote this to see if they interact better then, still needs to be written
+        #effiently
+        #------------calcs if Human is ALERTED------------
+        nearest_zombie = 0
+        heap = self.pq.heap
+        for i in range(len(heap)):
+            idx = heap[i][1]
+            if entity_list[idx].mode == "Z": 
+                nearest_zombie = entity_list[idx]
+                break
+        if  nearest_zombie != 0:
+            awareness_r = self.param_dict["awareness_r_H"]
+        
+            #get position of this nearest zombie
+            position_nearest_zombie = nearest_zombie.pos
+        
+            #get the distance
+            distance_zombie_to_human = self.get_distance(position_nearest_zombie) 
+        
+            #compare distance to really small float, so we never to a div by zero 
+            #in the line after
+            distance = max(distance_zombie_to_human, math.nextafter(0, 1.0))
+        
+            if distance <= awareness_r:
+                print("zombie too close!")
+                self.change_alerted(new_alerted=True)
+            
+                #update position of alerter
+                self.change_pos_alerter(position_nearest_zombie) 
+            
+                #get vector from position zombie pointing to position human
+                human_to_zombie_vector = position_nearest_zombie - self.pos
+            
+                #get the new unit vector whichs points the zombi to the human
+                new_human_direction = - human_to_zombie_vector / distance
+            else: self.change_alerted(False)
+                
+        #-----raphi provisorisch done -------------------------------
+
         # check if human is alone
         if len(self.pq.heap) == 0:
             self.lonely_walk()
@@ -656,11 +700,11 @@ class entity:
         # periodic boundaries
         if self.pos[0]>=self.param_dict["x_bounds"][1]: # check upper x bound
             self.pos[0]-=self.param_dict["x_bounds"][1]
-        if self.pos[0]<=self.param_dict["x_bounds"][0]: # check lower x bound
+        if self.pos[0]<self.param_dict["x_bounds"][0]: # check lower x bound
             self.pos[0]+=self.param_dict["x_bounds"][1]
         if self.pos[1]>=self.param_dict["y_bounds"][1]: # check upper y bound
             self.pos[1]-=self.param_dict["y_bounds"][1]
-        if self.pos[1]<=self.param_dict["y_bounds"][0]: # check lower y bound
+        if self.pos[1]<self.param_dict["y_bounds"][0]: # check lower y bound
             self.pos[1]+=self.param_dict["y_bounds"][1]
 
         

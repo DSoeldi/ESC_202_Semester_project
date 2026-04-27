@@ -5,11 +5,11 @@ import numpy as np
 from step_update import *
 from anim_func import *
 
-xbounds = (0.0,10.0)
-ybounds = (0.,10.)
+xbounds = (0.0,100.0)
+ybounds = (0.,100.)
 
-param_dict = create_parameter_dict(n_H=10, n_Z=10,timestep=.08, n_steps=100, bite_r_Z_H = 0.002, 
-                                   x_bounds=np.array(xbounds), y_bounds=np.array(ybounds))
+param_dict = create_parameter_dict(n_H=100, n_Z=10,timestep=.08, n_steps=100, bite_r_Z_H = 0.002, 
+                                   x_bounds=np.array(xbounds), y_bounds=np.array(ybounds), awareness_r_H=1., max_speed_H=28.0)
 
 entities = Initialize_entities(param_dict)
 
