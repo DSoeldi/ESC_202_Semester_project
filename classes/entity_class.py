@@ -512,8 +512,7 @@ class entity:
                         #update position of alerter
                         self.change_pos_alerter(other.pos) 
                         return
-
-                    break#if closte other is not close enough all others will be to
+                    else: break#if closte other is not close enough all others will be to
                     
             self.change_alerted(False)
             self.change_pos_alerter(None)
@@ -565,18 +564,9 @@ class entity:
         pos_alerter = self.pos_alerter
         
         distance = self.get_distance(pos_alerter) 
-        
-        #compare distance to really small float, so we never to a div by zero 
-        #in the line after
-        safe_distance = max(distance, math.nextafter(0, 1.0))
-        
-        if safe_distance <= bite_r:
+
+        if distance <= bite_r:
             self.change_mode("Z")
-
-            
-
-        
-
         return
     #--------------------check_infection-FINISH-RAPHAEL----------------------------
     
@@ -650,8 +640,9 @@ class entity:
             vel_avg += other.velocity
 
         # contributions of other entities
-        pos_avg = pos_avg/n_humans
-        vel_avg = vel_avg/n_humans
+        actual_n = len(relevant_entities)
+        pos_avg = pos_avg/actual_n
+        vel_avg = vel_avg/actual_n
 
 
         # not sure if this is correctly implemented

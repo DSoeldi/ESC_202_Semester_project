@@ -129,12 +129,93 @@ class test_entity(unittest.TestCase):
         
     #---------------------update_alerted_state_alerter_pos tsts ----------------
     def test_update_alerted_true_when_within_radius(self):
-        pass
+            """Zombie should flip to alerted=True if a human is within range."""
+            target_pos = np.array([2.0, 0.0])
+            human = make_entity(pos=target_pos, velocity=(0,0))
+            human.mode = "H"
+            entities = [human]
     
+            # dist2 = 4.0, which is < 10^2
+            subject = make_subject(pos=(0, 0), velocity=(0, 0), heap_entries=[(4.0, 0)])
+            subject.mode = "Z"
+            subject.param_dict = {"awareness_r_Z": 10.0}
+            
+            subject.update_alerted_state_alerter_pos(entities)
+    
+            subject.change_alerted.assert_called_with(True)
+
     def test_update_alerted_false_when_outside_radius(self):
-        pass
+        """Zombie should stay calm (False) if the human is too far away."""
+        target_pos = np.array([20.0, 0.0])
+        human = make_entity(pos=target_pos, velocity=(0,0))
+        human.mode = "H"
+        entities = [human]
 
+        # dist2 = 400.0, which is > 10^2
+        subject = make_subject(pos=(0, 0), velocity=(0, 0), heap_entries=[(400.0, 0)])
+        subject.mode = "Z"
+        subject.param_dict = {"awareness_r_Z": 10.0}
+        
+        subject.update_alerted_state_alerter_pos(entities)
 
+        subject.change_alerted.assert_called_with(False)
+
+    def test_update_pos_alerted_when_alerted(self):
+        """Subject should store the exact coordinates of the entity it's chasing."""
+        target_pos = np.array([5.0, 5.0])
+        zombie = make_entity(pos=target_pos, velocity=(0,0))
+        zombie.mode = "Z"
+        entities = [zombie]
+
+        # Human looking for Zombie
+        subject = make_subject(pos=(0, 0), velocity=(0, 0), heap_entries=[(50.0, 0)])
+        subject.mode = "H"
+        subject.param_dict = {"awareness_r_H": 10.0}
+        
+        subject.update_alerted_state_alerter_pos(entities)
+
+        # Verify the actual position passed to the setter matches the target
+        actual_pos_called = subject.change_pos_alerter.call_args[0][0]
+        np.testing.assert_array_equal(actual_pos_called, target_pos)
+
+    def test_update_pos_alerted_to_NAN_when_not_alerted(self):
+        """If nothing is in range, the 'alerter position' should be reset to None."""
+        subject = make_subject(pos=(0, 0), velocity=(0, 0), heap_entries=[])
+        subject.mode = "H"
+        subject.param_dict = {"awareness_r_H": 5.0}
+        
+        subject.update_alerted_state_alerter_pos([])
+
+        subject.change_pos_alerter.assert_called_with(None)
+        
+#-------------------check_infection_H_tests------------------
+    def test_mode_changes_to_zombie_when_within_bite_radius(self):
+            """Verify that a human turns into a zombie when too close to an alerter."""
+            #human
+            subject = make_subject(pos=(0, 0), velocity=(0, 0))
+            #alerter pos (withing bite radius)
+            subject.pos_alerter = np.array([0.1, 0.0])
+            subject.param_dict = {"bite_r_Z_H": 1.0}
+            
+            # Action
+            subject.check_infection_H()
+            
+            #Did the mode change to "Z"?
+            subject.change_mode.assert_called_once_with("Z")
+
+    def test_mode_stays_human_when_outside_bite_radius(self):
+        """Verify that the human stays a human if they are outside the bite radius."""
+        #human
+        subject = make_subject(pos=(0, 0), velocity=(0, 0))
+        #zombie outside bite radius
+        subject.pos_alerter = np.array([5.0, 0.0])
+        subject.param_dict = {"bite_r_Z_H": 1.0}
+        
+        # Action
+        subject.check_infection_H()
+        
+        #change_mode should NOT have been called
+        subject.change_mode.assert_not_called()
         
 #-------------------------------
 def make_entity(pos, velocity):
@@ -147,6 +228,9 @@ def make_entity(pos, velocity):
 def make_subject(pos, velocity, heap_entries=None):
     subject = make_entity(pos, velocity)
     subject.pq = MagicMock()
+    subject.change_mode = MagicMock()
+    subject.change_alerted = MagicMock()
+    subject.change_pos_alerter = MagicMock()
     subject.pq.heap = heap_entries if heap_entries is not None else []
     
     #Initialize an empty dict so the real code doesn't crash 
@@ -156,8 +240,15 @@ def make_subject(pos, velocity, heap_entries=None):
     #This gives the function "Memory" (for asserts) and "Logic" (the real code)
     subject.random_walk = MagicMock(side_effect=lambda: entity.random_walk(subject))
     subject.zombie_walk = MagicMock(side_effect=lambda ents: entity.zombie_walk(subject, ents))
+    subject.update_alerted_state_alerter_pos = MagicMock(
+        side_effect=lambda ents: entity.update_alerted_state_alerter_pos(subject, ents)
+    )
+    subject.zombie_walk = MagicMock(
+        side_effect=lambda ents: entity.zombie_walk(subject, ents)
+    )
     
     # Helpers
+    subject.check_infection_H = lambda: entity.check_infection_H(subject)
     subject.get_direction = lambda: entity.get_direction(subject)
     subject.get_speed = lambda: entity.get_speed(subject)
     subject.change_velocity = lambda v: setattr(subject, 'velocity', v)
