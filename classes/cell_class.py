@@ -1,5 +1,5 @@
 import numpy as np
-from entity_class import entity
+from classes.entity_class import entity
 from math import nextafter, inf
 
 class cell:

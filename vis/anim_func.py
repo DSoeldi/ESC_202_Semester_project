@@ -8,11 +8,12 @@ def animate(i, snapshots,param_dict, ax):
     ax.clear()
     positions, modes = zip(*snapshots[i])
     xs, ys = zip(*positions)
-    color_map = {"H": "blue", "Z": "red"}
+    color_map = {"H": "blue", "Z": "green"}
     #so we can spot infections have to change here, mode of the snapshot
     colors = [color_map[m] for m in modes]
     
-    ax.scatter(xs, ys, c = colors)
+    #size = 0.1 is about ...
+    ax.scatter(xs, ys, c = colors, s = 0.1)
     ax.set_ylim(param_dict["y_bounds"])
     ax.set_xlim(param_dict["x_bounds"])
     ax.set_title(f"Step {i}")

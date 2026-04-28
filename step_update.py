@@ -1,4 +1,4 @@
-from entity_class import entity
+from classes.entity_class import entity
 import numpy as np
 
 
@@ -19,7 +19,7 @@ def step_update(entities, root_cell, param_dict):
         if entity.mode == "Z":
             entity.kNN()   # update the prioq in the entity with the ones that are 
                                             # sorrounding it at the moment
-            entity.zombie_walk(entities, param_dict)            # update velocity and direction of zombie walk based on 
+            entity.zombie_walk(entities)            # update velocity and direction of zombie walk based on 
                                             # prioq
         
         
@@ -30,13 +30,13 @@ def step_update(entities, root_cell, param_dict):
             entity.kNN()   # update the prioq in the entity with the ones that are 
                                             # sorrounding it at the moment
             
-            entity.human_walk(entities, param_dict)             # update velocity and direction of zombie walk based on 
+            entity.human_walk(entities)             # update velocity and direction of zombie walk based on 
                                             # prioq
         
         
     for entity in entities:
         if entity.mode == "H" and entity.alerted is True: 
-            entity.check_infection_H(param_dict["bite_r_Z_H"])            # check if human is in the kill radius of zombie
+            entity.check_infection_H()            # check if human is in the kill radius of zombie
         # this has to happen in its own loop because if not, the gradual updating of the location
         # will change the way the simulation runs. some humans will be updated before some zombies
         # even have the chance to move. 
