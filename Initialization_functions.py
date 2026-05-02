@@ -77,7 +77,9 @@ def validate_flocking_factors(flocking_factors):
 
 def create_parameter_dict(n_H, n_Z, timestep, n_steps, x_bounds, y_bounds, root_cell = None, 
                           awareness_r_H = None, awareness_r_Z = None, max_speed_H = None, max_speed_Z = None, 
-                          walking_speed_Z = None, H_contr_flocking = None,flocking_factors = None, max_ents_cell = None, bite_r_Z_H = None, smooth_rand_walk = None):
+                          walking_speed_Z = None, H_contr_flocking = None,flocking_factors = None, 
+                          max_ents_cell = None, bite_r_Z_H = None, smooth_rand_walk = None,
+                          analyze = None):
     """
     function that creates the parameter dictionary
 
