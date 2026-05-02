@@ -199,6 +199,7 @@ def create_parameter_dict(n_H, n_Z, timestep, n_steps, x_bounds, y_bounds, root_
             "max_speed_Z": max_speed_Z,
             "walking_speed_Z": walking_speed_Z,
             "H_contr_flocking": H_contr_flocking,
+            "flocking_factors": flocking_factors,
             "max_ents_cell": max_ents_cell,
             "bite_r_Z_H": bite_r_Z_H,
             "smooth_rand_walk": smooth_rand_walk,
