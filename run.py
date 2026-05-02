@@ -12,7 +12,7 @@ param_dict = create_parameter_dict(n_H=100, n_Z=4,timestep=.008, n_steps=1000,
                                    smooth_rand_walk = 0.3,
                                    bite_r_Z_H = 0.001,
                                    walking_speed_Z = 3.,
-                                   max_speed_Z = 30., max_speed_H = 26.,
+                                   max_speed_Z = 20., max_speed_H = 15.,
                                    awareness_r_Z = 0.8,awareness_r_H = 0.8,
                                    x_bounds=np.array(xbounds), y_bounds=np.array(ybounds), 
                                    flocking_factors=(0.8,0.8,0.8), # avoidfactor, matchingfactor and centeringfactor
