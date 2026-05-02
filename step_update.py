@@ -2,6 +2,7 @@ from classes.entity_class import entity
 import numpy as np
 from Initialization_functions import *
 from tqdm import tqdm
+from classes.analytics import *
 
 
 
@@ -57,7 +58,12 @@ def run(param_dict):
     for step in tqdm(range(0,param_dict["n_steps"])):
         step_update(entities)
         snapshots.append([(entity.pos.copy(), entity.mode) for entity in entities])  # Store a copy of 
-    return snapshots
+    
+    if param_dict["analyze"]:
+        sim_analytics = Analytics(snapshots, param_dict)
+        return snapshots, sim_analytics
+
+    return snapshots, None
 
 
 
