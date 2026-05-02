@@ -215,3 +215,4 @@ cheat_sheet_raphael_priv.py
 .png
 .gif
 *.json
+/outputs

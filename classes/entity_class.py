@@ -597,7 +597,7 @@ class entity:
         self.change_velocity(run_direction*self.param_dict["max_speed_H"])
 
 
-    def flocking_behavior(self, entity_list, n_humans = 4, min_distance = 1, factors = (0.3,0.2,0.2)):
+    def flocking_behavior(self, entity_list, n_humans = 4, min_distance = 1, factors = (0.2,0.2,0.7)):
         """
         flocking behavior for humans when no zombies are close to them. they include the closest few 
         humans (n_humans) in their flocking behavior. 

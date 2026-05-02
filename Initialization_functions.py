@@ -63,18 +63,21 @@ def validate_smooth_rand_walk(smooth_rand_walk):
         )
     return
 
-def validate_analylze(analyze):
-    """
-    Validates the analyze param for analysis after simulation
-    expects a Boolean
-    """
-    if type(analyze) is not bool:
-        raise TypeError(f"analyze must be a boolean, got {type(analyze)}")
+def validate_flocking_factors(flocking_factors):
+    '''
+    validates the flocking factors. expects a tuple of three floats
+    '''
+    if not isinstance(flocking_factors, tuple):
+        raise TypeError("flocking factors must be saved as tuple object")
+    
+    for factor in flocking_factors:
+        if not isinstance(factor, float):
+            raise TypeError("flocking factors must be of float type")
 
 
 def create_parameter_dict(n_H, n_Z, timestep, n_steps, x_bounds, y_bounds, root_cell = None, 
                           awareness_r_H = None, awareness_r_Z = None, max_speed_H = None, max_speed_Z = None, 
-                          walking_speed_Z = None, H_contr_flocking = None, max_ents_cell = None, bite_r_Z_H = None, smooth_rand_walk = None, analyze = None):
+                          walking_speed_Z = None, H_contr_flocking = None,flocking_factors = None, max_ents_cell = None, bite_r_Z_H = None, smooth_rand_walk = None):
     """
     function that creates the parameter dictionary
 
@@ -124,6 +127,10 @@ def create_parameter_dict(n_H, n_Z, timestep, n_steps, x_bounds, y_bounds, root_
             Number of Humans that contribute to flocking computations.
             If None is given, default value will be used.
 
+        flocking_factors (tuple(float, float, float)):
+            factors for flocking subcalculations. 
+            avoidfactor, matchingfactor and centeringfactor
+
         max_ents_cell (int):
             Maximum number of entities allowed within 1 cell. 
             If None is given, default value will be used.
@@ -153,6 +160,7 @@ def create_parameter_dict(n_H, n_Z, timestep, n_steps, x_bounds, y_bounds, root_
     max_speed_Z = 20.0 if max_speed_Z == None else max_speed_Z
     walking_speed_Z = 4.0 if walking_speed_Z == None else walking_speed_Z
     H_contr_flocking = 4 if H_contr_flocking == None else H_contr_flocking
+    flocking_factors = (0.2,0.3,0.2) if flocking_factors == None else flocking_factors
     max_ents_cell = 6 if max_ents_cell == None else max_ents_cell
     bite_r_Z_H = 0.0002 if bite_r_Z_H == None else bite_r_Z_H
     smooth_rand_walk = 0.2 if smooth_rand_walk == None else smooth_rand_walk
@@ -175,7 +183,7 @@ def create_parameter_dict(n_H, n_Z, timestep, n_steps, x_bounds, y_bounds, root_
     if not isinstance(max_ents_cell, int): raise(TypeError)
     validate_bite_r_Z_H(bite_r_Z_H)
     validate_smooth_rand_walk(smooth_rand_walk)
-    validate_analylze(analyze)
+    validate_flocking_factors(flocking_factors)
 
     return {"n_H": n_H,                          
             "n_Z": n_Z,
