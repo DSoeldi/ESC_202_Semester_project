@@ -595,6 +595,7 @@ class entity:
  
         run_direction = -(self.pos_alerter - self.pos)/distance # unit vector of direction
         self.change_velocity(run_direction*self.param_dict["max_speed_H"])
+        self.set_preferred_dir(run_direction)
 
 
     def flocking_behavior(self, entity_list, n_humans = 4, min_distance = 1):
