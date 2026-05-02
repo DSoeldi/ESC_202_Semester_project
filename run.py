@@ -19,6 +19,5 @@ param_dict = create_parameter_dict(n_H=100, n_Z=50,timestep=.008, n_steps=100,
 
 
 snapshots, analytics = run(param_dict)
-print(analytics)
 ani = run_animate(snapshots, param_dict)
 ani.save("testanimation.gif")

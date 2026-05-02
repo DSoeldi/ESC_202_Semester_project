@@ -646,11 +646,14 @@ class entity:
 
 
         # not sure if this is correctly implemented
-        self.velocity = (self.velocity + 
+        self.change_velocity(self.velocity + 
                             (pos_avg-self.pos)*centeringfactor +
                             (vel_avg-self.velocity)*matchingfactor +
                             (close*avoidfactor))
-                                         
+        speed = self.get_speed()
+        if speed>self.param_dict["max_speed_H"]:
+            speed_unit = self.velocity/speed
+            self.change_velocity(speed_unit*self.param_dict["max_speed_H"])
 
     def human_walk(self, entity_list):
         """
