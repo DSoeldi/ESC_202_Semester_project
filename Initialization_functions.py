@@ -63,10 +63,18 @@ def validate_smooth_rand_walk(smooth_rand_walk):
         )
     return
 
+def validate_analylze(analyze):
+    """
+    Validates the analyze param for analysis after simulation
+    expects a Boolean
+    """
+    if type(analyze) is not bool:
+        raise TypeError(f"analyze must be a boolean, got {type(analyze)}")
+
 
 def create_parameter_dict(n_H, n_Z, timestep, n_steps, x_bounds, y_bounds, root_cell = None, 
                           awareness_r_H = None, awareness_r_Z = None, max_speed_H = None, max_speed_Z = None, 
-                          walking_speed_Z = None, H_contr_flocking = None, max_ents_cell = None, bite_r_Z_H = None, smooth_rand_walk = None):
+                          walking_speed_Z = None, H_contr_flocking = None, max_ents_cell = None, bite_r_Z_H = None, smooth_rand_walk = None, analyze = None):
     """
     function that creates the parameter dictionary
 
@@ -128,6 +136,10 @@ def create_parameter_dict(n_H, n_Z, timestep, n_steps, x_bounds, y_bounds, root_
             Between 0 - 1 (straight line - random walk), smooth_rand_walk * pi (half a circle) 
             gives a spectrum in radans an entity can randomly deviated into in the direction 
             of its velocity to the left and to the right hemisphere.
+
+        analyze (Bool):
+            Checks if analysis functions should be run after simulation. 
+            Normally set to false
             
         
 
@@ -144,6 +156,7 @@ def create_parameter_dict(n_H, n_Z, timestep, n_steps, x_bounds, y_bounds, root_
     max_ents_cell = 6 if max_ents_cell == None else max_ents_cell
     bite_r_Z_H = 0.0002 if bite_r_Z_H == None else bite_r_Z_H
     smooth_rand_walk = 0.2 if smooth_rand_walk == None else smooth_rand_walk
+    analyze = False if analyze == None else analyze
 
     # validate correct types were given
     if not isinstance(n_H, int): raise(TypeError)
@@ -162,6 +175,7 @@ def create_parameter_dict(n_H, n_Z, timestep, n_steps, x_bounds, y_bounds, root_
     if not isinstance(max_ents_cell, int): raise(TypeError)
     validate_bite_r_Z_H(bite_r_Z_H)
     validate_smooth_rand_walk(smooth_rand_walk)
+    validate_analylze(analyze)
 
     return {"n_H": n_H,                          
             "n_Z": n_Z,
@@ -177,7 +191,8 @@ def create_parameter_dict(n_H, n_Z, timestep, n_steps, x_bounds, y_bounds, root_
             "H_contr_flocking": H_contr_flocking,
             "max_ents_cell": max_ents_cell,
             "bite_r_Z_H": bite_r_Z_H,
-            "smooth_rand_walk": smooth_rand_walk}
+            "smooth_rand_walk": smooth_rand_walk,
+            "analyze": analyze}
 
 
 def Initialize_entities(param_dict):
