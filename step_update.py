@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 
 
-def step_update(entities, root_cell, param_dict):
+def step_update(entities):
     """
     Does a single timestep forward for all entities in the entities list. 
 
@@ -55,7 +55,7 @@ def run(param_dict):
     snapshots = []
     print("---simulating horde---")
     for step in tqdm(range(0,param_dict["n_steps"])):
-        step_update(entities, root_cell, param_dict)
+        step_update(entities)
         snapshots.append([(entity.pos.copy(), entity.mode) for entity in entities])  # Store a copy of 
     return snapshots
 
