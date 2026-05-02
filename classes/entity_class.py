@@ -597,7 +597,7 @@ class entity:
         self.change_velocity(run_direction*self.param_dict["max_speed_H"])
 
 
-    def flocking_behavior(self, entity_list, n_humans = 4, min_distance = 1, factors = (0.2,0.2,0.7)):
+    def flocking_behavior(self, entity_list, n_humans = 4, min_distance = 1):
         """
         flocking behavior for humans when no zombies are close to them. they include the closest few 
         humans (n_humans) in their flocking behavior. 
@@ -619,7 +619,7 @@ class entity:
         relevant_entities = self.pq.heap[0:n_humans] # number of relevant objects that are looped over
         if len(relevant_entities)<1:
             raise ValueError("relevant entities is zero when it should be at least 1")
-        avoidfactor, matchingfactor, centeringfactor = factors
+        avoidfactor, matchingfactor, centeringfactor = self.param_dict["flocking_factors"]
 
         # average values to influence pattern
         pos_avg = np.array((0.,0.))
