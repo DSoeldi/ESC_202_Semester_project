@@ -1,5 +1,7 @@
 from classes.entity_class import entity
 import numpy as np
+from Initialization_functions import *
+from tqdm import tqdm
 
 
 
@@ -44,6 +46,19 @@ def step_update(entities, root_cell, param_dict):
         
 
         ## check if silent/dead/deceased/gone/in hell
+
+
+def run(param_dict):
+    entities = Initialize_entities(param_dict)
+    root_cell = Initialize_root_cell(param_dict, entities)
+    param_dict["root_cell"] = root_cell
+    snapshots = []
+    print("---simulating horde---")
+    for step in tqdm(range(0,param_dict["n_steps"])):
+        step_update(entities, root_cell, param_dict)
+        snapshots.append([(entity.pos.copy(), entity.mode) for entity in entities])  # Store a copy of 
+    return snapshots
+
 
 
 
