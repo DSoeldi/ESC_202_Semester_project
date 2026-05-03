@@ -8,7 +8,9 @@ from vis.anim_func import *
 xbounds = (0.0,15.)
 ybounds = (0.,15.)
 
-param_dict = create_parameter_dict(n_H=100, n_Z=4,timestep=.008, n_steps=1000, 
+
+
+param_dict = create_parameter_dict(n_H=100, n_Z=0,timestep=.8, n_steps=50, 
                                    smooth_rand_walk = 0.3,
                                    bite_r_Z_H = 0.001,
                                    walking_speed_Z = 3.,
