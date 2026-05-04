@@ -715,7 +715,7 @@ class entity:
         if self.preferred_dir is None:
             self.set_preferred_dir()
 
-        self.change_velocity(self.param_dict["walking_speed_H"] * self.preferred_dir)
+        self.change_velocity(self.param_dict["lonely_walk_speed_H"] * self.preferred_dir)
 
 
 

@@ -57,7 +57,7 @@ class Analytics:
         keys_to_show = [
             "n_H", "n_Z", "timestep", "n_steps", "x_bounds", "y_bounds",
             "awareness_r_H", "awareness_r_Z", "max_speed_H", "max_speed_Z",
-            "walking_speed_Z", "walking_speed_H", "H_contr_flocking",
+            "walking_speed_Z", "lonely_walk_speed_H", "H_contr_flocking",
             "bite_r_Z_H", "smooth_rand_walk"
         ]
 
