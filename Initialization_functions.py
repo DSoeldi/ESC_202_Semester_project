@@ -77,7 +77,7 @@ def validate_flocking_factors(flocking_factors):
 
 def create_parameter_dict(n_H, n_Z, timestep, n_steps, x_bounds, y_bounds, root_cell = None, 
                           awareness_r_H = None, awareness_r_Z = None, max_speed_H = None, max_speed_Z = None, 
-                          walking_speed_Z = None, H_contr_flocking = None,flocking_factors = None, 
+                          walking_speed_Z = None, walking_speed_H = None, H_contr_flocking = None,flocking_factors = None, 
                           max_ents_cell = None, bite_r_Z_H = None, smooth_rand_walk = None,
                           analyze = None):
     """
@@ -125,6 +125,10 @@ def create_parameter_dict(n_H, n_Z, timestep, n_steps, x_bounds, y_bounds, root_
             Walking speed for a Zombie (when no human is within it's awareness_r_Z). 
             If None is given, default value will be used.
         
+        walking_speed_H(float) in [km/h]:
+            Walking speed for a Human (when lonely walk). 
+            If None is given, default value will be used.
+        
         H_contr_flocking (int):
             Number of Humans that contribute to flocking computations.
             If None is given, default value will be used.
@@ -161,6 +165,7 @@ def create_parameter_dict(n_H, n_Z, timestep, n_steps, x_bounds, y_bounds, root_
     max_speed_H = 28.0 if max_speed_H == None else max_speed_H
     max_speed_Z = 20.0 if max_speed_Z == None else max_speed_Z
     walking_speed_Z = 4.0 if walking_speed_Z == None else walking_speed_Z
+    walking_speed_H = 5.0 if walking_speed_H == None else walking_speed_H
     H_contr_flocking = 4 if H_contr_flocking == None else H_contr_flocking
     flocking_factors = (0.2,0.3,0.2) if flocking_factors == None else flocking_factors
     max_ents_cell = 6 if max_ents_cell == None else max_ents_cell
@@ -181,6 +186,7 @@ def create_parameter_dict(n_H, n_Z, timestep, n_steps, x_bounds, y_bounds, root_
     validate_max_speed(max_speed_H)
     validate_max_speed(max_speed_Z)
     if not isinstance(walking_speed_Z, float): raise(TypeError)
+    if not isinstance(walking_speed_H, float): raise(TypeError)
     if not isinstance(H_contr_flocking, int): raise(TypeError)
     if not isinstance(max_ents_cell, int): raise(TypeError)
     validate_bite_r_Z_H(bite_r_Z_H)
@@ -198,6 +204,7 @@ def create_parameter_dict(n_H, n_Z, timestep, n_steps, x_bounds, y_bounds, root_
             "max_speed_H": max_speed_H,
             "max_speed_Z": max_speed_Z,
             "walking_speed_Z": walking_speed_Z,
+            "walking_speed_H": walking_speed_H,
             "H_contr_flocking": H_contr_flocking,
             "flocking_factors": flocking_factors,
             "max_ents_cell": max_ents_cell,
