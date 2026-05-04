@@ -35,6 +35,8 @@ def step_update(entities):
             
             entity.human_walk(entities)             # update velocity and direction of zombie walk based on 
                                             # prioq
+
+            entity.adj_max_speed(0.999999) # reduce max speed of each human at each timestep by  multiplying with factor
         
         
     for entity in entities:
