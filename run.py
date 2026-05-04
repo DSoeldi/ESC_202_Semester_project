@@ -11,11 +11,11 @@ ybounds = (0.,0.5)
 
 
 param_dict = create_parameter_dict(
-    timestep= 1 * 0.000278, n_steps=86400,  # timestep has factor write  10 seoncd (*0.0002789 and timestepp will be 10 second
+    timestep= 1 * 0.000278, n_steps=200,  # timestep has factor write  10 seoncd (*0.0002789 and timestepp will be 10 second
                                    smooth_rand_walk = 0.2,
                                    bite_r_Z_H = 0.001,
                                    
-                                   n_H= 1000, n_Z=1, 
+                                   n_H= 100, n_Z=1, 
                                    walking_speed_Z = 5., walking_speed_H = 5.,
                                    max_speed_Z = 26., max_speed_H = 25.,
                                    awareness_r_Z = 0.015,awareness_r_H = 0.015,
