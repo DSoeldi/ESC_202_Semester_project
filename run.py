@@ -10,7 +10,7 @@ ybounds = (0.,15.)
 
 
 
-param_dict = create_parameter_dict(n_H=100, n_Z=0,timestep=.8, n_steps=50, 
+param_dict = create_parameter_dict(n_H=100, n_Z=50,timestep=.8, n_steps=50, 
                                    smooth_rand_walk = 0.3,
                                    bite_r_Z_H = 0.001,
                                    walking_speed_Z = 3.,
@@ -18,7 +18,7 @@ param_dict = create_parameter_dict(n_H=100, n_Z=0,timestep=.8, n_steps=50,
                                    awareness_r_Z = 0.8,awareness_r_H = 0.8,
                                    x_bounds=np.array(xbounds), y_bounds=np.array(ybounds), 
                                    flocking_factors=(0.8,0.8,0.8), # avoidfactor, matchingfactor and centeringfactor
-                                   analyze=True, H_contr_flocking=8)
+                                   H_contr_flocking=8)
 np.random.seed(42)
 snapshots, analyze = run(param_dict)
 ani = run_animate(snapshots, param_dict)
