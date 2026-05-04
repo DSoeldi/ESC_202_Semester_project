@@ -420,6 +420,8 @@ class entity:
             
             #distance between human and zombie
             distance_between_entities = self.get_distance(pos_closest_human)
+            if distance_between_entities > self.param_dict["awareness_r_Z"]:
+                zombie_to_human_vector = -zombie_to_human_vector
             
             #compare distance to really small float, so we never to a div by zero 
             #in the line after
@@ -594,6 +596,8 @@ class entity:
             "Zombie and Human are at the EXACT same spot! Check function for more Information")
  
         run_direction = -(self.pos_alerter - self.pos)/distance # unit vector of direction
+        if distance > self.param_dict["awareness_r_H"]:
+                run_direction = -run_direction
         self.change_velocity(run_direction*self.param_dict["max_speed_H"])
         self.set_preferred_dir(run_direction)
 
@@ -734,6 +738,16 @@ class entity:
         if self.pos[1]<self.param_dict["y_bounds"][0]: # check lower y bound
             self.pos[1]+=self.param_dict["y_bounds"][1]
 
+    def adj_max_speed(self, factor):
+        """adjust max speed for a given entity
         
+        Args: 
+            factor[float]: Factor to be multiplied with max speed of that entity.
+        """
+        if self.mode == "H":
+            self.param_dict["max_speed_H"] = self.param_dict["max_speed_H"] * factor
+        
+        if self.mode == "Z":
+            self.param_dict["max_speed_Z"] = self.param_dict["max_speed_Z"] * factor
             
     
