@@ -1,21 +1,8 @@
 # ESC_202_Semester_project
 Google Docs: https://docs.google.com/document/d/1POh07QEm5y5eyBowOd3Yyox-G9CZ4kUh3U6GJYQ0rNg/edit?tab=t.0
 
-## classes that were written:
+Präsi: https://docs.google.com/presentation/d/16nem0CTda3dVc0Bdxeo9FqWHFYiAJLjosEe6t8yHliA/edit?slide=id.p#slide=id.p
 
-## functions that were written:
-
-## files created
-
-## Recently added to file:
-- 13.04 (ANAIS): 
-    - entitiy class:
-        - added an attribute idx_all_ents. Index of an entity index within the entity class
-        - added kNN relevant functions 
-        - intiate kNN by calling: __entity.kNN()__
-            - this calls ther periodic kNN algorithm automatically!!!
-            - and __updates the pq automatically__
-            - __do not do kNN for Zombies!__ Will raise warning. Way more efficient if we only call it on humans, and update Zombies, when it pops up in a human pq
 
 
 ## @raphi
