@@ -1,8 +1,24 @@
 # ESC_202_Semester_project
 Google Docs: https://docs.google.com/document/d/1POh07QEm5y5eyBowOd3Yyox-G9CZ4kUh3U6GJYQ0rNg/edit?tab=t.0
 
-Präsi: https://docs.google.com/presentation/d/16nem0CTda3dVc0Bdxeo9FqWHFYiAJLjosEe6t8yHliA/edit?slide=id.p#slide=id.p
+## Präsi
+https://docs.google.com/presentation/d/16nem0CTda3dVc0Bdxeo9FqWHFYiAJLjosEe6t8yHliA/edit?slide=id.p#slide=id.p
 
+- motivation: Auf lustig, 
+
+- Methode:
+    - Diego human teil
+    - Raphi zombie
+    - Anais: partition knn
+    - Zeigen mit beispiele
+
+    - Tests gemacht für alle funktionen
+
+- Analytics:
+    - Pop dynamics, was kann man sonsr noch
+
+- Probleme encountered, 
+    - Knn problems, 
 
 
 ## @raphi
@@ -19,10 +35,6 @@ Präsi: https://docs.google.com/presentation/d/16nem0CTda3dVc0Bdxeo9FqWHFYiAJLjo
 - min heap oder max heap? jenachdem muss flocking geändert werden da dort im heap gesliced wird.
 - zombies can go silent/dead/decease if they dont eat humans for some time
 - change.velocity bruche statt self.velocity = ...
-
-## 10.04.2026
-min heap oder max heap? jenachdem muss flocking geändert werden da dort im heap gesliced wird.
--> mean heap (chlinsti distanz ganz vorne)
 
 
 ## future?

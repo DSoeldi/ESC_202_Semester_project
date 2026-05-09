@@ -109,7 +109,7 @@ for e in entities:
     e.kNN()
 
 # create fig
-plt.figure(figsize = (10,15))
+plt.figure()
 fig, ax = plt.subplots()
 
 # ------------------------------------------Call Plotting Functions------------------------------------------
