@@ -5,14 +5,14 @@ import numpy as np
 from step_update import *
 from vis.anim_func import *
 
-xbounds = (0.0,0.25)
-ybounds = (0.,0.25)
+xbounds = (0.0,1.)
+ybounds = (0.,1.)
 param_dict = create_parameter_dict(
-                                   timestep= 1 * 0.000278, n_steps=360,  
+                                   timestep= 1 * 0.000278, n_steps=200,  
                                    smooth_rand_walk = 0.2,
                                    bite_r_Z_H = 0.003,
                                    
-                                   n_H= 200, n_Z=5, 
+                                   n_H= 100, n_Z=5, 
                                    walking_speed_Z = 5., lonely_walk_speed_H = 20.,
                                    max_speed_Z = 30., max_speed_H = 25.,
                                    awareness_r_Z = 0.060, awareness_r_H = 0.04,

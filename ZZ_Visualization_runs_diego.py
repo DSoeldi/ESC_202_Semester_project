@@ -22,14 +22,14 @@ param_dict = create_parameter_dict(
                                    H_contr_flocking=10,
                                    
                                    x_bounds=np.array(xbounds), y_bounds=np.array(ybounds), 
-                                   flocking_factors=(0.6,0.8,0.6), # avoidfactor, matchingfactor and centeringfactor
+                                   flocking_factors=(0.4,0.9,0.4), # avoidfactor, matchingfactor and centeringfactor
                                    analyze = False
                                    )
 
 np.random.seed(42)
 snapshots, analyze = run(param_dict)
 ani = run_animate(snapshots, param_dict)
-ani.save("outputs/diego_slides/flocking_example.gif")
+ani.save("outputs/diego_slides/less_flocking_example.gif")
 
 ########### Zombie repulsion behavior
 xbounds = (0.0,10.)

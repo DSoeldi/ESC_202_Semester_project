@@ -421,7 +421,7 @@ class entity:
             #distance between human and zombie
             distance_between_entities = self.get_distance(pos_closest_human)
             if distance_between_entities > self.param_dict["awareness_r_Z"]:
-                zombie_to_human_vector = -zombie_to_human_vector
+                zombie_to_human_vector = -zombie_to_human_vector 
             
             #compare distance to really small float, so we never to a div by zero 
             #in the line after
@@ -599,7 +599,20 @@ class entity:
         if distance > self.param_dict["awareness_r_H"]:
                 run_direction = -run_direction
         self.change_velocity(run_direction*self.param_dict["max_speed_H"])
-        self.set_preferred_dir(run_direction)
+        ## 
+        old_phi = math.atan2(run_direction[1],run_direction[0])
+        
+        #get the random angle
+        #this has to be between 0-1, zero means he will follow a straight line
+
+        smooth_phi = rng.uniform(-np.pi * 0.2, np.pi * 0.2)
+        
+        new_phi = old_phi + smooth_phi
+        
+        #get new direction which is depend on last direction +"slightly different angle
+        new_direction = np.array([np.cos(new_phi), np.sin(new_phi)])
+        ##
+        self.set_preferred_dir(new_direction)
 
 
     def flocking_behavior(self, entity_list, n_humans = 4, min_distance = 1):
