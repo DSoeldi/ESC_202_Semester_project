@@ -232,7 +232,8 @@ class entity:
         Returns:
             [double]: distance to coordinates
         """
-        direction = self.pos - coords
+        #bug fix, so its wraps around edges
+        direction = self.get_periodic_vector(coords)
         return np.sqrt(direction[0]**2 + direction[1]**2)
         
     def change_mode(self, new_mode):
@@ -348,6 +349,34 @@ class entity:
             for x in [0.0, -period[0], period[0]]:
                 offset = np.array([x, y])
                 self.neighbor_search(self.param_dict["root_cell"], offset)
+                
+    def get_periodic_vector(self, target_pos):
+        """
+        Calculates the shortest directional vector from self to target, 
+        accounting for periodic (wrap-around) boundaries.
+        """
+        #check if the vector goes in correct direction
+        vector = target_pos - self.pos
+        
+        #map sizes
+        width = self.param_dict["x_bounds"][1] - self.param_dict["x_bounds"][0]
+        height = self.param_dict["y_bounds"][1] - self.param_dict["y_bounds"][0]
+        
+        # X boundary
+        # If the vector is longer than half the map, it's faster to wrap around
+        #e.g. zombie at x 10, human at x =  40, map is 50 x width
+        if vector[0] > width / 2: # 30 > 25 ? yes, ok then faster to go other direction
+            vector[0] -= width # 30 - 50 = -20,, if zombie goes minus 20 left he will land on same position as human
+        elif vector[0] < -width / 2:
+            vector[0] += width
+            
+        #Check Y boundary
+        if vector[1] > height / 2:
+            vector[1] -= height
+        elif vector[1] < -height / 2:
+            vector[1] += height
+            
+        return vector
 
      
     def neighbor_search(self, curr_cell, offset):
@@ -416,7 +445,7 @@ class entity:
             pos_closest_human = self.pos_alerter
             
             #get vector from position zombie pointing to position human
-            zombie_to_human_vector = pos_closest_human - self.pos
+            zombie_to_human_vector = self.get_periodic_vector(pos_closest_human)
             
             #distance between human and zombie
             distance_between_entities = self.get_distance(pos_closest_human)
@@ -692,12 +721,12 @@ class entity:
         
         if self.alerted: #full speed away
         
-            pos_closest_human = self.pos_alerter
+            pos_closest_zombie = self.pos_alerter
             #get vector from position zombie pointing to position human
-            human_to_zombie_vector = pos_closest_human - self.pos
+            human_to_zombie_vector = self.get_periodic_vector(pos_closest_zombie)
             
             #distance between human and zombie
-            distance_between_entities = self.get_distance(pos_closest_human)
+            distance_between_entities = self.get_distance(pos_closest_zombie)
             
             #compare distance to really small float, so we never to a div by zero 
             #in the line after
