@@ -489,7 +489,7 @@ class entity:
         if np.isnan(old_direction).any(): 
             theta = rng.uniform(0, np.pi * 2)
             old_direction = np.array([np.cos(theta), np.sin(theta)])
-            warnings.warn(f'invalid value encountered in self.get_direction, initialized a rand. direction: {old_direction}')
+            #warnings.warn(f'invalid value encountered in self.get_direction, initialized a rand. direction: {old_direction}')
         
         #get the angle to of this direction, to x achis?
         old_phi = math.atan2(old_direction[1], old_direction[0])
